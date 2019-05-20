@@ -6,6 +6,7 @@ const blocks_in_cluster = 350;
 var savePlan = new Map();
 var onlyMachine = '';
 var mappingPlanRow = new Map();
+var lengthPlanRow = new Map();
 var elem = document.documentElement;
 
 $(function() {
@@ -35,6 +36,8 @@ $(function() {
         $.post(url, function(data) {
             $("#myModal").modal('hide');
             $("#myModalLock").modal('show');
+            $("#wo_lock").attr("checked", true);
+            $("#wo_lock_unchk").attr("checked", true);
         });
     });
 
@@ -44,6 +47,8 @@ $(function() {
         $.post(url, function(data) {
             $("#myModal").modal('show');
             $("#myModalLock").modal('hide');
+            $("#wo_lock").attr("checked", false);
+            $("#wo_lock_unchk").attr("checked", false);
         });
     });
     
@@ -207,12 +212,52 @@ function zoomout() {
 }
 
 function getMapSizeWO(work_center_id, team_id){
-    console.log('getMapSizeWO')
     $.post('/api/plan/' + work_center_id + '/' + team_id)
     .done((data) => {
         for (let i = 0; i < data.length; i++) {
             let info = data[i];
             mappingPlanRow.set(info.WorkOrder_Id, getDatePlan(info.Plan_Start, info.Plan_Stop));
+            let startFmt = moment(info.Plan_Start).format('DD/MM/YYYY');
+            let stopFmt = moment(info.Plan_Stop).format('DD/MM/YYYY');
+
+            let planStartHour = info.Plan_Start_Hour;
+            let planStopHour = info.Plan_Stop_Hour;
+
+            if(planStartHour<=8){
+                planStartHour = 8;
+            }else if(planStartHour<=16){
+                planStartHour = 16;
+            }else if(planStartHour<=24){
+                planStartHour = 24;
+            }
+
+            if(planStopHour<=8){
+                planStopHour = 8;
+            }else if(planStopHour<=16){
+                planStopHour = 16;
+            }else if(planStopHour<=24){
+                planStopHour = 24;
+            }
+
+            //check start date
+            if(lengthPlanRow.get(startFmt)){
+                let test = lengthPlanRow.get(startFmt);
+                if(planStartHour>test){
+                    lengthPlanRow.set(startFmt, planStartHour);
+                }
+            }else{
+                lengthPlanRow.set(startFmt, planStartHour);
+            }
+
+            //check stop date
+            if(lengthPlanRow.get(stopFmt)){
+                let test = lengthPlanRow.get(stopFmt);
+                if(planStopHour>test){
+                    lengthPlanRow.set(stopFmt, planStopHour);
+                }
+            }else{
+                lengthPlanRow.set(stopFmt, planStopHour);
+            }
         }
     });
 }
@@ -277,14 +322,14 @@ async function genHeader(work_center_id, team_id) {
         // Team
         html_header += '<tr><th style="text-align:center;background:#e8e8e8;">Team</th>'
         for (let m of getModel(mTeam)) {
-            html_header += "<th style='background:rgb(189, 62, 136);z-index: 5;' colspan='" + m[1] + "'>" + m[0] + "</th>";
+            html_header += "<th style='text-align: center;background:rgb(189, 62, 136);z-index: 5;' colspan='" + m[1] + "'>" + m[0] + "</th>";
         }
         html_header += '</tr>';
 
         // Work Center
         html_header += '<tr><th style="text-align:center;background:#e8e8e8;">WC</th>'
         for (let m of getModel(mWC)) {
-            html_header += "<th style=\"background: rgb(130, 181, 249);z-index: 5;\" colspan='" + m[1] + "'>" + m[0] + "</th>";
+            html_header += "<th style=\"text-align: center;background: rgb(130, 181, 249);z-index: 5;\" colspan='" + m[1] + "'>" + m[0] + "</th>";
         }
         html_header += '</tr>';
 
@@ -301,7 +346,7 @@ async function genHeader(work_center_id, team_id) {
         }
         html_header += '<tr><th style="text-align:center;background:#e8e8e8;">Lane</th>'
         for (let m of x_data) {
-            html_header += "<th style=\"background: white;z-index: 5;\" colspan='" + m[1] + "'>" + m[0].split('_')[0] + "</th>";
+            html_header += "<th style=\"text-align: center;background: white;z-index: 5;\" colspan='" + m[1] + "'>" + m[0].split('_')[0] + "</th>";
         }
         html_header += '</tr>';
 
@@ -310,7 +355,7 @@ async function genHeader(work_center_id, team_id) {
         let allHeader = [];
         html_header += '<tr><th style="text-align:center;background-color:#e8e8e8;white-space: nowrap;">Sub Machine</th>'
         for (let m of mMachine) {
-            html_header += "<th style=\"white-space: nowrap;z-index: 5;\" colspan='" + m[1].Max_Header + "'><a style=\"text-decoration:none;\" href=\"javascript:loadColsData('" + m[0] + "')\">" + m[0] + "</a></th>";
+            html_header += "<th style=\"text-align: center; white-space: nowrap;z-index: 5;background-color:#e8e8e8;\" colspan='" + m[1].Max_Header + "'><a style=\"text-decoration:none;\" href=\"javascript:loadColsData('" + m[0] + "')\">" + m[0] + "</a></th>";
             allSub.push(m[1].SubMachine_Id);
         }
         html_header += '</tr>';
@@ -518,9 +563,17 @@ function printWritePlan(info){
         show_vertical = '';
     }
     vertext_html += '<span style="white-space: nowrap; '+show_vertical+' text-orientation: mixed; text-align: left;">' + info.Model_Id + ' ('+hours_plus+')</span>';    
-    mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over '+info.WorkOrder_Id+'" style="max-height: 20px;">'+vertext_html+'</div>');
+    mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over-text '+info.WorkOrder_Id+'" style="max-height: 20px;">'+vertext_html+'</div>');
 
     return mappingWhitePlan;
+}
+
+function getLengthPlanRow(dateAt){
+    if(lengthPlanRow.get(dateAt)){
+        return lengthPlanRow.get(dateAt);
+    }else{
+        return 8;
+    }
 }
 
 function pumpDivHtml(){
@@ -542,10 +595,10 @@ function pumpDivHtml(){
             
             if(row_id==0&&col_id==0){// only first column [0]
                 let data = [];
-                let row_default = 7;
                 for(let m of savePlan){
                     let dateAt = m[0];
                     let infoArr= m[1];
+                    let row_default = getLengthPlanRow(dateAt)-1;
                     if(infoArr!==''&&infoArr!=='Sunday'&&infoArr!=='Holiday'){
                         data.push('<div class="mydiv-date">'+dateAt+'</div>');
                         for(let i=0;i<row_default;i++){
@@ -581,13 +634,13 @@ function pumpDivHtml(){
 
                 let data = [];
                 let planCount = 0;
-                let planCountStr = '&nbsp;';
-                let row_default = 8;
+                let planCountStr = '&nbsp;';                
                 let info;
                 let arrBeforeGantt = '';
                 for(let m of savePlan){
                     let dateAt = moment(m[0], 'DD/MM/YYYY');
                     let infoArr= m[1];
+                    let row_default = getLengthPlanRow(dateAt);
                     if(infoArr!==''&&infoArr!=='Sunday'&&infoArr!=='Holiday'){//draw gantt chart
                         let showWO = '';
                         let infoTmp = [];
@@ -724,10 +777,6 @@ function pumpDivHtml(){
     });
 }
 
-function sleep(time) {
-    return new Promise((resolve) => setTimeout(resolve, time));
-}
-
 function getSizeRow(info){
     let size_row = 8;
     if(info.Plan_Start_Hour>8||info.Plan_Stop_Hour>8){
@@ -807,13 +856,13 @@ function showModalData(m) {
         if(rs.Plan_Lock=='L'){        
           $("#myModal").modal('hide');
           $("#myModalLock").modal('show');
-          $("#wo_lock").attr("checked", true);
+          $("#wo_lock").attr("checked", false);
           $("#wo_lock_unchk").attr("checked", true);
           $("#work_order").val(rs.WorkOrder_Id);
           break;
         }else{
           $("#wo_lock").attr("checked", false);
-          $("#wo_lock_unchk").attr("checked", false);
+          $("#wo_lock_unchk").attr("checked", true);
           $("#work_order").val(rs.WorkOrder_Id);
         }
         

@@ -54,12 +54,21 @@ table {
     width: 100%;
     text-align: center;
     white-space: nowrap;
-    background-color: #bf69e7;
+    background-color: #ccb3ff;
     min-width: 25px;
     min-height: 20px;
 }
 .mydiv-plan-over {
     border-top: 1px solid #000000;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #ecde58;
+    min-width: 25px;
+    min-height: 20px;
+}
+.mydiv-plan-over-text {
+    border-top: 1px solid #ecde58;
     width: 100%;
     text-align: center;
     white-space: nowrap;
