@@ -1,16 +1,11 @@
+const { config, port } = require('./config');
+
 const bodyParser = require('body-parser');
 const path = require('path');
 const express = require("express");
 const router = express.Router();
 const app = express();
 const sql = require("mssql");
-
-const config = {
-    user: "ton",
-    password: "p@ssw0rd2535",
-    server: "pf.imd.co.th",
-    database: "NCI_IMD"
-};
 
 const _sql =
   "select b.Team_Id,b.WorkCenter_Id,b.Lane_Id,a.SubMachine_Id " +
@@ -158,7 +153,6 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/node_modules'));
 app.use("/", router);
 
-const port = 1337 || process.env.PORT;
 app.listen(port, () => {
   console.log("Server is running... port = " + port);
 });

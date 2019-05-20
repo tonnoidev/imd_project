@@ -277,14 +277,14 @@ async function genHeader(work_center_id, team_id) {
         // Team
         html_header += '<tr><th style="text-align:center;background:#e8e8e8;">Team</th>'
         for (let m of getModel(mTeam)) {
-            html_header += "<th style='background:rgb(189, 62, 136);' colspan='" + m[1] + "'>" + m[0] + "</th>";
+            html_header += "<th style='background:rgb(189, 62, 136);z-index: 5;' colspan='" + m[1] + "'>" + m[0] + "</th>";
         }
         html_header += '</tr>';
 
         // Work Center
         html_header += '<tr><th style="text-align:center;background:#e8e8e8;">WC</th>'
         for (let m of getModel(mWC)) {
-            html_header += "<th style=\"background: rgb(130, 181, 249);\" colspan='" + m[1] + "'>" + m[0] + "</th>";
+            html_header += "<th style=\"background: rgb(130, 181, 249);z-index: 5;\" colspan='" + m[1] + "'>" + m[0] + "</th>";
         }
         html_header += '</tr>';
 
@@ -301,7 +301,7 @@ async function genHeader(work_center_id, team_id) {
         }
         html_header += '<tr><th style="text-align:center;background:#e8e8e8;">Lane</th>'
         for (let m of x_data) {
-            html_header += "<th style=\"background: white;\" colspan='" + m[1] + "'>" + m[0].split('_')[0] + "</th>";
+            html_header += "<th style=\"background: white;z-index: 5;\" colspan='" + m[1] + "'>" + m[0].split('_')[0] + "</th>";
         }
         html_header += '</tr>';
 
@@ -310,7 +310,7 @@ async function genHeader(work_center_id, team_id) {
         let allHeader = [];
         html_header += '<tr><th style="text-align:center;background-color:#e8e8e8;white-space: nowrap;">Sub Machine</th>'
         for (let m of mMachine) {
-            html_header += "<th style=\"white-space: nowrap;\" colspan='" + m[1].Max_Header + "'><a style=\"text-decoration:none;\" href=\"javascript:loadColsData('" + m[0] + "')\">" + m[0] + "</a></th>";
+            html_header += "<th style=\"white-space: nowrap;z-index: 5;\" colspan='" + m[1].Max_Header + "'><a style=\"text-decoration:none;\" href=\"javascript:loadColsData('" + m[0] + "')\">" + m[0] + "</a></th>";
             allSub.push(m[1].SubMachine_Id);
         }
         html_header += '</tr>';
@@ -320,7 +320,7 @@ async function genHeader(work_center_id, team_id) {
         for (let m of mMachine) {
             let info = m[1];
             for (let y = 0; y < info.Max_Header; y++) {
-                html_header += '<th style="text-align:center;background-color:#e8e8e8;">' + (y + 1) + '</th>';
+                html_header += '<th style="text-align:center;background-color:#e8e8e8;z-index: 5;">' + (y + 1) + '</th>';
             }
 
             if(info.Header_Real){
@@ -341,7 +341,7 @@ async function genHeader(work_center_id, team_id) {
 
         // generate body 1 row
         let strData = '<tr>';
-        strData += '<td machine="" virtual="" max_head="" style="vertical-align: top;">&nbsp;</td>';
+        strData += '<td machine="" virtual="" max_head="" style="vertical-align: top; z-index: 5;">&nbsp;</td>';
         for (let j = 0; j < allHeader.length; j++) {
             let machine = allHeader[j].split('_')[0];
             let isVirtual = allHeader[j].split('_')[2];
@@ -501,10 +501,10 @@ function printWritePlan(info){
     if((info.Over_Week == 1)||(info.Over_Promise == 1)||(info.Plan_Lock == 'L')){
         let div_html = '';
         if (info.Over_Week == 1){
-            div_html += '<span class="fa-stack fa-1x"><i class="fa fa-calendar-o fa-stack-1x"></i><span class="fa fa-stack-1x">7</span></span>';
+            div_html += '<span class="fa-stack fa-1x"><i class="fa fa-calendar-o"></i><span class="fa fa-stack-1x">7</span></span>';
         }
         if (info.Over_Promise == 1){
-            div_html += '<span class="fa-stack fa-1x"><i class="fa fa-calendar-o fa-stack-1x"></i><span class="fa fa-stack-1x">P</span></span>';
+            div_html += '<span class="fa-stack fa-1x"><i class="fa fa-calendar-o"></i><span class="fa fa-stack-1x">P</span></span>';
         }
         if (info.Plan_Lock == 'L'){
             div_html += '<span class="fa-stack fa-1x"><i class="fa fa-lock"></i></span>';

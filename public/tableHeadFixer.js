@@ -267,7 +267,7 @@
                 foot: false,
                 left: 0,
                 right: 0,
-                'z-index': 0
+                'z-index': 5
             };
 
             var settings = $.extend({}, defaults, param);
