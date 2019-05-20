@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>NCI | Production Planning</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/momotara_logo.png">
+
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="/tableHeadFixer.js"></script>
+    <script src="/moment/moment.js"></script>
+    <script src="/moment-timezone/moment-timezone.js"></script>
+
+    <script src="/clusterize.js/clusterize.min.js"></script>
+    <link href="/clusterize.js/clusterize.css" rel="stylesheet">
+
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
+
+    <script src="/gasparesganga-jquery-loading-overlay/dist/loadingoverlay.min.js"></script>
+
+    <link href="/font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="/main.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="title">
+        <h3>วางแผนการผลิต</h3>
+    </div>
+    <div align="center" style="margin-bottom: 5px; padding: 5px;">
+        <div style="padding: 10px;">
+            จัดเรียงโดย:<input type="radio" name="rdOpt" value='wc' checked="checked"> Work Center&nbsp;
+            <input type="radio" name="rdOpt" value='team'> Team&nbsp;
+        </div>
+        <div style="padding: 10px;" id="divWC">
+            เลือก WC: 
+            <select id="selWC" style="padding: 2px; width: 150px;">
+                <option value="">Please Select</option>
+            </select>
+        </div>
+        <div style="padding: 10px; display: none;" id="divTeam">
+            ทีมที่รับผิดชอบ: 
+            <select id="selTeam" style="padding: 2px; width: 150px;">
+                <option value="">Please Select</option>
+            </select>
+        </div>
+        <div style="padding: 10px;" align="center">
+            <button class="btn btn-primary" style="width: 100px;" id="btn_search">ค้นหา</button>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col" align="left">
+                    <button class="btn btn-default suggest" id="btnSuggest">Suggest Plan</button>
+                    <button class="btn btn-default fullscreen" id="fullscreen">Full screen</button>
+                </div>
+                <div class="col" align="right">
+                    <button class="btn btn-default" onclick="zoomin()">
+                        <i style="color:green;text-align:center" class="fa fa-plus-circle" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-default" onclick="zoomout()">
+                        <i style="color:orange;text-align:center" class="fa fa-minus-circle" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="divMyTable" style="height: 500px; overflow: auto;" align="center">
+        <table id="myTable" border="1" width="100%" cellpadding="0" cellspacing="0">
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- show message tooltip -->
+    <div><span id="msg_tooltip"></span></div>
+    
+    <!-- The Modal -->
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Setting Resource Usage</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group row">
+                            <label for="wo_lock" class="col-sm-4 col-form-label">WO LOCK</label>
+                            <div class="col-sm-2">
+                                <input type="checkbox" id="wo_lock" class="form-control">
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="col-form-label">LOCK WO</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="work_order" class="col-sm-4 col-form-label">Work Order</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="work_order" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="wo_model" class="col-sm-4 col-form-label">Model</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="wo_model" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="work_center" class="col-sm-4 col-form-label">Work Center</label>
+                            <div class="col-sm-8">
+                                <select name="work_center" id="work_center" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="sub_machine" class="col-sm-4 col-form-label">Sub Machine</label>
+                            <div class="col-sm-8">
+                                <select name="sub_machine" id="sub_machine" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="header_start" class="col-sm-4 col-form-label">หัวเริ่มต้น<span style="color: red;">*</span></label>
+                            <div class="col-sm-8">
+                                <input type="text" id="header_start" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="header_stop" class="col-sm-4 col-form-label">หัวสิ้นสุด<span style="color: red;">*</span></label>
+                            <div class="col-sm-8">
+                                <input type="text" id="header_stop" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="header_qty" class="col-sm-4 col-form-label">จำนวนหัว<span style="color: red;">*</span></label>
+                            <div class="col-sm-8">
+                                <input type="text" id="header_qty" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="plan_start" class="col-sm-4 col-form-label">เริ่มต้นวันที่</label>
+                            <div class="col-sm-8">
+                                <input data-provide="datepicker" id="plan_start" data-date-format="dd/mm/yyyy" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="" class="col-sm-4 col-form-label"></label>
+                            <div class="col-sm-8">
+                                <button type="button" id="btnModalSuggestPlan" class="btn btn-success form-control">Suggest Plan</button>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="plan_stop" class="col-sm-4 col-form-label">สิ้นสุดวันที่</label>
+                            <div class="col-sm-8">
+                                <input data-provide="datepicker" id="plan_stop" data-date-format="dd/mm/yyyy" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="header_usage" class="col-sm-4 col-form-label">จำนวนวันที่ใช้</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="header_usage" class="form-control" disabled>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- The Modal Unlock -->
+    <div class="modal" id="myModalLock">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Setting Resource Usage</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form>
+                        <input type="hidden" id="work_order" class="form-control">
+                        <div class="form-group row">
+                            <label for="wo_lock_unchk" class="col-sm-6 col-form-label">WO LOCK</label>
+                            <div class="col-sm-3">
+                                <input type="checkbox" checked="checked" id="wo_lock_unchk" class="form-control">
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="col-form-label">LOCK WO</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-6">
+                                <button type="button" id="btnModalOK" class="btn btn-info form-control" data-dismiss="modal">OK</button>
+                            </div>
+                            <div class="col-sm-6">
+                                <button type="button" id="btnModalClose" class="btn btn-danger form-control" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
+
+<script src="/main.js"></script>
