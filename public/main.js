@@ -8,6 +8,7 @@ var onlyMachine = '';
 var mappingPlanRow = new Map();
 var lengthPlanRow = new Map();
 var elem = document.documentElement;
+var INFO_END_DATE;
 
 $(function() {
 
@@ -15,7 +16,7 @@ $(function() {
         for (let x = 0; x < data.length; x++) {
           $("#selWC").append("<option>" + data[x].WorkCenter_Id + "</option>");
         }
-      })
+    });
     
     $.getJSON("/api/list/opts/x/1", function (data) {
         for (let x = 0; x < data.length; x++) {
@@ -36,8 +37,8 @@ $(function() {
         $.post(url, function(data) {
             $("#myModal").modal('hide');
             $("#myModalLock").modal('show');
-            $("#wo_lock").attr("checked", true);
-            $("#wo_lock_unchk").attr("checked", true);
+            $("#wo_lock").prop("checked", true);
+            $("#wo_lock_unchk").prop("checked", true);
         });
     });
 
@@ -47,8 +48,8 @@ $(function() {
         $.post(url, function(data) {
             $("#myModal").modal('show');
             $("#myModalLock").modal('hide');
-            $("#wo_lock").attr("checked", false);
-            $("#wo_lock_unchk").attr("checked", false);
+            $("#wo_lock").prop("checked", false);
+            $("#wo_lock_unchk").prop("checked", false);
         });
     });
     
@@ -158,6 +159,13 @@ function loadDataGantt(){
         team_id = '';
     }
     if(work_center_id!=''&&team_id!=''){
+
+        $.getJSON("/api/plan_enddate/"+work_center_id+"/"+team_id, function (data) {
+            for (let x = 0; x < data.length; x++) {
+              INFO_END_DATE = data[x];
+            }
+        })
+        
         getMapSizeWO(work_center_id, team_id);
         genHeader(work_center_id, team_id);
     }
@@ -434,7 +442,7 @@ async function generateGanttChart() {
     .done((data) => {
 
         if(data.length>0){
-            let info_end = data[data.length-1];
+            let info_end = INFO_END_DATE;
             let currDate = moment();
             let endDate = moment(info_end.Plan_Stop).format('DD/MM/YYYY');
 
@@ -535,9 +543,16 @@ function printWritePlan(info){
     let sizeRows = mappingPlanRow.get(info.WorkOrder_Id);
     let mappingWhitePlan = [];
     if (info.SetupMachine_Usage > 0){
+        let showHeader = '';
         let count_hours = Math.ceil(info.SetupMachine_Usage/60);
         for(let i=0;i<count_hours;i++){
-            mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine '+info.WorkOrder_Id+'">&nbsp;</div>');
+            if(i==0){
+                showHeader = info.SetupMachine_Usage;
+                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine '+info.WorkOrder_Id+'">'+showHeader+'</div>');
+            }else{
+                showHeader = '&nbsp;';
+                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine-bottom '+info.WorkOrder_Id+'">'+showHeader+'</div>');
+            }
         }
     }
     if(info.SetupHeader_Usage>0){
@@ -721,16 +736,30 @@ function pumpDivHtml(){
                         }
                     }else if(infoArr==='Sunday'||infoArr==='Holiday'){
                         if(info){
+                            let dateChkStart = moment(info.Plan_Start);
+                            let dateChkStop = moment(info.Plan_Stop);
                             if(virtual==='Y'){
-                                data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
-                            }else{
-                                if(arrBeforeGantt.length>0){
-                                    if(arrBeforeGantt[0]!==''){
-                                        data.push(arrBeforeGantt[0]);
-                                    }
-                                    arrBeforeGantt.splice(0,1);
+                                if(dateAt < dateChkStart || dateAt > dateChkStop){
+                                    data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
                                 }else{
-                                    data.push('<div '+clickModal+' class="mydiv-plan-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                    data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                }                                
+                            }else{                                
+                                if(arrBeforeGantt.length>0){
+                                    if(dateAt < dateChkStart || dateAt > dateChkStop){
+                                        data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
+                                    }else{
+                                        if(arrBeforeGantt[0]!==''){
+                                            data.push(arrBeforeGantt[0]);
+                                        }
+                                        arrBeforeGantt.splice(0,1);
+                                    }                                    
+                                }else{                                    
+                                    if(dateAt < dateChkStart || dateAt > dateChkStop){
+                                        data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
+                                    }else{
+                                        data.push('<div '+clickModal+' class="mydiv-plan-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                    }                                    
                                 }
                             }                            
                         }else{
@@ -853,22 +882,22 @@ function showModalData(m) {
     $.getJSON("/find_wo/"+m.id, function (data) {
       for (let x = 0; x < data.length; x++) {      
         let rs = data[x];
-        if(rs.Plan_Lock=='L'){        
-          $("#myModal").modal('hide');
-          $("#myModalLock").modal('show');
-          $("#wo_lock").attr("checked", false);
-          $("#wo_lock_unchk").attr("checked", true);
-          $("#work_order").val(rs.WorkOrder_Id);
-          break;
+        if(rs.Plan_Lock=='L'){
+            $("#myModal").modal('hide');
+            $("#myModalLock").modal('show');
+            $("#wo_lock").prop('checked', true);
+            $("#wo_lock_unchk").prop('checked', true);
         }else{
-          $("#wo_lock").attr("checked", false);
-          $("#wo_lock_unchk").attr("checked", true);
-          $("#work_order").val(rs.WorkOrder_Id);
+            $("#myModal").modal('show');
+            $("#myModalLock").modal('hide');
+            $("#wo_lock").prop('checked', false);
+            $("#wo_lock_unchk").prop('checked', false);
         }
         
+        $("#work_order").val(rs.WorkOrder_Id);
         $("#wo_model").val(rs.Model_Id);
-        $("#work_center").append($('<option>', {value:0, text: rs.WorkCenter_Id}));
-        $("#sub_machine").append($('<option>', {value:0, text: rs.SubMachine_Id}));
+        $("#work_center").html($('<option>', {value:0, text: rs.WorkCenter_Id}));
+        $("#sub_machine").html($('<option>', {value:0, text: rs.SubMachine_Id}));
         $("#header_start").val(rs.Header_Start);
         $("#header_stop").val(rs.Header_Stop);
         $("#header_qty").val(rs.Header_Real);

@@ -36,6 +36,32 @@ router.get("/api/list/holidays", (req, res) => {
     });
 });
 
+router.get("/api/getDateWorkMin/:date/:machine_id", (req, res) => {
+  let date = req.params.date;
+  let machine_id = req.params.machine_id;
+  let query = 'SELECT (CASE WHEN t2.h > 0 THEN 0 ELSE t2.c END) AS Shift ';
+  query += ' FROM (SELECT 480 * (CASE WHEN t1.c > 0 THEN 2 ELSE 1 END) AS c, ';
+  query += ' (SELECT COUNT(Holiday_date) AS Expr1 ';
+  query += ' FROM Holiday_TB AS h ';
+  query += ' WHERE (Holiday_date = \''+date+'\')) AS h ';
+  query += ' FROM (SELECT COUNT(Shift_Duty_Id) AS c ';
+  query += ' FROM Shift_Duty_TB AS sd ';
+  query += ' WHERE (Shift_Duty_Date = \''+date+'\') ';
+  query += ' AND (SubMachine_Id IN (\''+machine_id+'\')) ';
+  query += ' ) AS t1) AS t2 ';
+
+  new sql.ConnectionPool(config).connect().then(pool=>{
+    return pool.request().query(query);
+    }).then(result => {
+      res.json(result.recordset);
+      sql.close();
+    }).catch(err => {
+      res.send({ message: err})
+      sql.close();
+    });
+
+});
+
 router.post("/api/plan/:wc_id/:team_id", (req, res) => {
   let query = _sql;
 
@@ -51,6 +77,34 @@ router.post("/api/plan/:wc_id/:team_id", (req, res) => {
 
   new sql.ConnectionPool(config).connect().then(pool=>{
     query += ' order by Team_Id, WorkCenter_Id, Lane_Id, SubMachine_Id, Plan_Start';
+    return pool.request().query(query);
+    }).then(result => {
+      res.json(result.recordset);
+      sql.close();
+    }).catch(err => {
+      res.send({ message: err})
+      sql.close();
+    });
+});
+
+router.get("/api/plan_enddate/:wc_id/:team_id", (req, res) => {
+  let query = 'select top 1 a.Plan_Stop from PlanningDetailTemp_TB a ';
+  query += 'inner join SubMachine_TB b on a.SubMachine_Id=b.SubMachine_Id ';
+  query += 'inner join WorkOrderScoring_TB c on left(a.WorkOrder_Id,8)=c.WorkOrder_Id ';
+  query += 'where 1=1 ';
+
+  let wc_id = req.params.wc_id;
+  let team_id = req.params.team_id;
+
+  if(wc_id !== 'x'){
+    query += " and WorkCenter_Id='" + wc_id + "' ";
+  }
+  if(team_id !== 'x'){
+    query += " and Team_Id='" + team_id + "' ";
+  }
+  query += ' order by Plan_Start desc ';
+  
+  new sql.ConnectionPool(config).connect().then(pool=>{    
     return pool.request().query(query);
     }).then(result => {
       res.json(result.recordset);

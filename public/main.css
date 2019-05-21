@@ -45,7 +45,16 @@ table {
     width: 100%;    
     text-align: center;
     white-space: nowrap;
-    background-color: #ffba39;
+    background-color: #ffcc66;
+    min-width: 25px;
+    min-height: 20px;
+}
+.mydiv-plan-setup-machine-bottom {
+    border-top: 1px solid #ffcc66;
+    width: 100%;    
+    text-align: center;
+    white-space: nowrap;
+    background-color: #ffcc66;
     min-width: 25px;
     min-height: 20px;
 }
@@ -118,7 +127,7 @@ table {
     padding: 5px 0;
     text-align: left;
     position: fixed;
-    z-index: 1;
+    z-index: 10;
     background-color: black;
     color: #fff;
     overflow: hidden;

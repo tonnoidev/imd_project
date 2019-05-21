@@ -19,6 +19,9 @@
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
 
+    <script src="/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet" href="/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" />
+
     <script src="/gasparesganga-jquery-loading-overlay/dist/loadingoverlay.min.js"></script>
 
     <link href="/font-awesome/css/font-awesome.css" rel="stylesheet" />
@@ -55,6 +58,9 @@
                 <div class="col" align="left">
                     <button class="btn btn-default suggest" id="btnSuggest">Suggest Plan</button>
                     <button class="btn btn-default fullscreen" id="fullscreen">Full screen</button>
+                </div>
+                <div class="col" align="center">
+                    <span id="spMoreMachine" style="color: #f90;">*** หากพบข้อมูล Machine ไม่ได้แสดง ท่านสามารถกดโหลดได้อีกครั้งจากรหัส Machine นั้น ๆ ได้โดยตรง ***</span>
                 </div>
                 <div class="col" align="right">
                     <button class="btn btn-default" onclick="zoomin()">
@@ -146,7 +152,7 @@
                         <div class="form-group row">
                             <label for="plan_start" class="col-sm-4 col-form-label">เริ่มต้นวันที่</label>
                             <div class="col-sm-8">
-                                <input data-provide="datepicker" id="plan_start" data-date-format="dd/mm/yyyy" class="form-control" disabled>
+                                <input type="text" data-provide="datepicker" id="plan_start" data-date-format="dd/mm/yyyy" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -158,7 +164,7 @@
                         <div class="form-group row">
                             <label for="plan_stop" class="col-sm-4 col-form-label">สิ้นสุดวันที่</label>
                             <div class="col-sm-8">
-                                <input data-provide="datepicker" id="plan_stop" data-date-format="dd/mm/yyyy" class="form-control" disabled>
+                                <input data-provide="datepicker" id="plan_stop" data-date-format="dd/mm/yyyy" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -217,3 +223,6 @@
 </html>
 
 <script src="/main.js"></script>
+<script type="text/javascript">
+    $('.datepicker').datepicker();
+</script>
