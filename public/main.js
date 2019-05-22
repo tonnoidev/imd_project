@@ -273,8 +273,8 @@ function getMapSizeWO(work_center_id, team_id){
 function clearTopic() {
     onlyMachine = '';
 
-    $("thead").empty()
-    $("tbody").empty();
+    $("#myTable thead").empty()
+    $("#myTable tbody").empty();
 }
 
 function getModel(map_data) {
@@ -390,7 +390,7 @@ async function genHeader(work_center_id, team_id) {
             }
         }
         html_header += '</tr>';
-        $('thead').html(html_header);
+        $('#myTable thead').html(html_header);
 
         // generate body 1 row
         let strData = '<tr>';
@@ -403,7 +403,7 @@ async function genHeader(work_center_id, team_id) {
         }
         strData += '</tr>';
         COLS_TOTAL = allHeader.length;
-        $('tbody').append(strData);
+        $('#myTable tbody').append(strData);
 
         generateGanttChart();
     });
@@ -444,7 +444,7 @@ async function generateGanttChart() {
         if(data.length>0){
             let info_end = INFO_END_DATE;
             let currDate = moment();
-            let endDate = moment(info_end.Plan_Stop).format('DD/MM/YYYY');
+            let endDate = moment(info_end.Plan_Stop).add(1, 'days').format('DD/MM/YYYY');
 
             savePlan = new Map();
             for(let i=0;i<2500;i++){
@@ -539,6 +539,11 @@ function addModal(wo){
 }
 
 function printWritePlan(info){
+    let atp = '';
+    if(info.ATP==1){
+        atp = '-atp';
+    }
+
     let clickModal =  addModal(info.WorkOrder_Id);
     let sizeRows = mappingPlanRow.get(info.WorkOrder_Id);
     let mappingWhitePlan = [];
@@ -547,16 +552,16 @@ function printWritePlan(info){
         let count_hours = Math.ceil(info.SetupMachine_Usage/60);
         for(let i=0;i<count_hours;i++){
             if(i==0){
-                showHeader = info.SetupMachine_Usage;
-                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine '+info.WorkOrder_Id+'">'+showHeader+'</div>');
+                showHeader = info.SetupMachine_Usage;                
+                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine'+atp+' '+info.WorkOrder_Id+'">'+showHeader+'</div>');                                
             }else{
                 showHeader = '&nbsp;';
-                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine-bottom '+info.WorkOrder_Id+'">'+showHeader+'</div>');
+                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine-bottom'+atp+' '+info.WorkOrder_Id+'">'+showHeader+'</div>');
             }
         }
     }
     if(info.SetupHeader_Usage>0){
-        mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-header '+info.WorkOrder_Id+'">'+info.SetupHeader_Usage+'</div>');
+        mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-header'+atp+' '+info.WorkOrder_Id+'">'+info.SetupHeader_Usage+'</div>');
     }
     if((info.Over_Week == 1)||(info.Over_Promise == 1)||(info.Plan_Lock == 'L')){
         let div_html = '';
@@ -569,7 +574,7 @@ function printWritePlan(info){
         if (info.Plan_Lock == 'L'){
             div_html += '<span class="fa-stack fa-1x"><i class="fa fa-lock"></i></span>';
         }
-        mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over '+info.WorkOrder_Id+'" style="max-height: 20px;">'+div_html+'</div>');
+        mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+div_html+'</div>');
     }
     let vertext_html = '';
     let hours_plus = Math.ceil(info.Production_Usage / 60);
@@ -578,7 +583,7 @@ function printWritePlan(info){
         show_vertical = '';
     }
     vertext_html += '<span style="white-space: nowrap; '+show_vertical+' text-orientation: mixed; text-align: left;">' + info.Model_Id + ' ('+hours_plus+')</span>';    
-    mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over-text '+info.WorkOrder_Id+'" style="max-height: 20px;">'+vertext_html+'</div>');
+    mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over-text'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+vertext_html+'</div>');
 
     return mappingWhitePlan;
 }
@@ -651,6 +656,8 @@ function pumpDivHtml(){
                 let planCount = 0;
                 let planCountStr = '&nbsp;';                
                 let info;
+                let atp = '';
+
                 let arrBeforeGantt = '';
                 for(let m of savePlan){
                     let dateAt = moment(m[0], 'DD/MM/YYYY');
@@ -672,6 +679,11 @@ function pumpDivHtml(){
                                 if(showWO!==''&&i==infoTmp[j].Plan_Start_Hour){
                                     showWO = infoTmp[j].WorkOrder_Id;
                                     info = infoTmp[j];//object workorder
+                                    if(info.ATP==1){
+                                        atp = '-atp';
+                                    }else{
+                                        atp = '';
+                                    }
                                     arrBeforeGantt = printWritePlan(info);
                                     clickModal =  addModal(info.WorkOrder_Id);
                                     found_wo = true;
@@ -689,7 +701,7 @@ function pumpDivHtml(){
                                         arrBeforeGantt.splice(0,1);
                                     }else{
                                         let show_plan_wo_str = info.WorkOrder_Id;
-                                        data.push('<div '+clickModal+' class="mydiv-plan '+info.WorkOrder_Id+'">'+show_plan_wo_str+'</div>');
+                                        data.push('<div '+clickModal+' class="mydiv-plan'+atp+' '+info.WorkOrder_Id+'">'+show_plan_wo_str+'</div>');
                                     }                                    
                                 }
                             }else{
@@ -709,7 +721,7 @@ function pumpDivHtml(){
                                                     }
                                                     arrBeforeGantt.splice(0,1);
                                                 }else{
-                                                    data.push('<div '+clickModal+' class="mydiv-plan-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                                    data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
                                                 }
                                             }else if(dateAt_fmt===plan_stop_date_fmt&&i<plan_stop_hour){
                                                 if(arrBeforeGantt.length>0){
@@ -718,7 +730,7 @@ function pumpDivHtml(){
                                                     }
                                                     arrBeforeGantt.splice(0,1);
                                                 }else{
-                                                    data.push('<div '+clickModal+' class="mydiv-plan-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                                    data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
                                                 }
                                             }else{
                                                 data.push('<div class="mydiv">'+planCountStr+'</div>');
@@ -758,7 +770,7 @@ function pumpDivHtml(){
                                     if(dateAt < dateChkStart || dateAt > dateChkStop){
                                         data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
                                     }else{
-                                        data.push('<div '+clickModal+' class="mydiv-plan-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                        data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
                                     }                                    
                                 }
                             }                            
@@ -780,7 +792,7 @@ function pumpDivHtml(){
                                             }
                                             arrBeforeGantt.splice(0,1);
                                         }else{
-                                            data.push('<div '+clickModal+' class="mydiv-plan-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                            data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
                                         }
                                     }
                                 }else{
@@ -904,6 +916,9 @@ function showModalData(m) {
         $("#plan_start").val(moment(rs.Plan_Start).add(-7, 'hours').format('DD/MM/YYYY HH:mm:ss'));
         $("#plan_stop").val(moment(rs.Plan_Stop).add(-7, 'hours').format('DD/MM/YYYY HH:mm:ss'));
         $("#header_usage").val(rs.HeaderUsage);
+
+        $('#header_start').attr('max',rs.Max_Header);
+        $('#header_stop').attr('max',rs.Max_Header);
       }
     });
 }

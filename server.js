@@ -8,7 +8,9 @@ const app = express();
 const sql = require("mssql");
 
 const _sql =
-  "select b.Team_Id,b.WorkCenter_Id,b.Lane_Id,a.SubMachine_Id " +
+  "select " +
+  "(select count(*) from WorkOrder_TB where WorkOrder_Id=a.WorkOrder_Id and  Order_Factor='SS' AND SaleOrder_Id is not null) ATP," +
+  "b.Team_Id,b.WorkCenter_Id,b.Lane_Id,a.SubMachine_Id " +
   ",a.WorkOrder_Id,c.Item_Id,c.Model_Id " +
   ",a.Plan_Start,a.Plan_Start_Hour " +
   ",a.Plan_Stop,a.Plan_Stop_Hour,a.Week_No,a.SetupMachine " +

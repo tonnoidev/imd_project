@@ -18,14 +18,15 @@
 
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
-
-    <script src="/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-    <link rel="stylesheet" href="/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" />
+    
+    <script src="/bootstrap-datetime-picker/js/bootstrap-datetimepicker.min.js"></script>
+    <link rel="stylesheet" href="/bootstrap-datetime-picker/css/bootstrap-datetimepicker.min.css" />
 
     <script src="/gasparesganga-jquery-loading-overlay/dist/loadingoverlay.min.js"></script>
 
     <link href="/font-awesome/css/font-awesome.css" rel="stylesheet" />
     <link href="/main.css" rel="stylesheet">
+    <link href="/ext_style.css" rel="stylesheet">
 </head>
 
 <body>
@@ -134,13 +135,13 @@
                         <div class="form-group row">
                             <label for="header_start" class="col-sm-4 col-form-label">หัวเริ่มต้น<span style="color: red;">*</span></label>
                             <div class="col-sm-8">
-                                <input type="text" id="header_start" class="form-control">
+                                <input type="number" id="header_start" min="1" onkeydown="return false" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="header_stop" class="col-sm-4 col-form-label">หัวสิ้นสุด<span style="color: red;">*</span></label>
                             <div class="col-sm-8">
-                                <input type="text" id="header_stop" class="form-control">
+                                <input type="number" onchange="checkHead(this.value);" id="header_stop" min="1" onkeydown="return false" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -152,7 +153,7 @@
                         <div class="form-group row">
                             <label for="plan_start" class="col-sm-4 col-form-label">เริ่มต้นวันที่</label>
                             <div class="col-sm-8">
-                                <input type="text" data-provide="datepicker" id="plan_start" data-date-format="dd/mm/yyyy" class="form-control" readonly>
+                                <input type="text" id="plan_start" class="form-control datepicker" readonly>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -164,7 +165,7 @@
                         <div class="form-group row">
                             <label for="plan_stop" class="col-sm-4 col-form-label">สิ้นสุดวันที่</label>
                             <div class="col-sm-8">
-                                <input data-provide="datepicker" id="plan_stop" data-date-format="dd/mm/yyyy" class="form-control" readonly>
+                                <input id="plan_stop" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -218,11 +219,46 @@
         </div>
     </div>
 
+    <script>
+    function checkHead(number){
+        let header_start = $('#header_start').val();
+        let header_stop = $('#header_stop').val();
+        let total = (header_stop - header_start)+1;
+        if(total<=0){
+            total = 1;
+        }
+        $('#header_qty').val(total);
+        // if(number>$("#header_start").val()){
+        //     $("#header_stop").val($("#header_start").val());
+        // }
+    }
+    </script>
 </body>
 
 </html>
 
 <script src="/main.js"></script>
 <script type="text/javascript">
-    $('.datepicker').datepicker();
+    $(function () {
+        $(".datepicker").datetimepicker({
+            minuteStep:30,
+            format: 'dd/mm/yyyy hh:ii:ss',
+            autoclose: true,
+            changeMonth: true,
+            changeYear: true,
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            showButtonPanel: false,
+            buttonImageOnly: true,
+            constrainInput: true,
+            gotoCurrent: true,
+            showAnim: "fadeIn"
+        }).on('changeDate', function(ev){
+            let dateStart = moment(ev.date.valueOf())
+            let lengthDay = $("#header_usage").val();
+            let dateStartFmt = dateStart.format('DD/MM/YYYY HH:mm:ss');
+            let dateStop = dateStart.add(lengthDay, 'days').format('DD/MM/YYYY HH:mm:ss');
+            $("#plan_stop").val(dateStop);
+        });
+    });
 </script>
