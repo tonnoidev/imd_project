@@ -133,14 +133,14 @@ function letSuggestPlanning(wc, tm){
     if(wc !='' || tm != ''){
         let url = "http://pf.imd.co.th:81/NCI_PPS_PHP/?page=/process/api&proc=suggestPlan&wc="+wc+"&tm="+tm;
         var jqxhr = $.get(url, function() {
-            console.log("success");
+            loadDataGantt();
         })
         .done(function() {
-            alert( "Suggest Plan Second success" );
             loadDataGantt();
         })
         .fail(function() {
-            alert("Suggest Plan error !!!");
+            // alert("Suggest Plan error !!!");
+            loadDataGantt();
         })
     }
 }
