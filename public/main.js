@@ -9,6 +9,7 @@ var mappingPlanRow = new Map();
 var lengthPlanRow = new Map();
 var elem = document.documentElement;
 var INFO_END_DATE;
+var ALL_MACHINE = [];
 
 $(function() {
 
@@ -273,8 +274,10 @@ function getMapSizeWO(work_center_id, team_id){
 function clearTopic() {
     onlyMachine = '';
 
-    $("#myTable thead").empty()
+    $("#myTable thead").empty();
     $("#myTable tbody").empty();
+
+    ALL_MACHINE = [];
 }
 
 function getModel(map_data) {
@@ -404,6 +407,8 @@ async function genHeader(work_center_id, team_id) {
         strData += '</tr>';
         COLS_TOTAL = allHeader.length;
         $('#myTable tbody').append(strData);
+
+        ALL_MACHINE = mMachine;
 
         generateGanttChart();
     });
@@ -909,7 +914,13 @@ function showModalData(m) {
         $("#work_order").val(rs.WorkOrder_Id);
         $("#wo_model").val(rs.Model_Id);
         $("#work_center").html($('<option>', {value:0, text: rs.WorkCenter_Id}));
-        $("#sub_machine").html($('<option>', {value:0, text: rs.SubMachine_Id}));
+
+        $("#sub_machine").html('');
+        for(let m of ALL_MACHINE){
+            let info = m[1];
+            $("#sub_machine").append($('<option>', {value:0, text: info.SubMachine_Id}));
+        }
+
         $("#header_start").val(rs.Header_Start);
         $("#header_stop").val(rs.Header_Stop);
         $("#header_qty").val(rs.Header_Real);
