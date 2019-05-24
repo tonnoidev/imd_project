@@ -135,13 +135,13 @@
                         <div class="form-group row">
                             <label for="header_start" class="col-sm-4 col-form-label">หัวเริ่มต้น<span style="color: red;">*</span></label>
                             <div class="col-sm-8">
-                                <input type="number" id="header_start" min="1" onkeydown="return false" class="form-control">
+                                <input type="number" onchange="checkHead();" id="header_start" min="1" onkeydown="return false" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="header_stop" class="col-sm-4 col-form-label">หัวสิ้นสุด<span style="color: red;">*</span></label>
                             <div class="col-sm-8">
-                                <input type="number" onchange="checkHead(this.value);" id="header_stop" min="1" onkeydown="return false" class="form-control">
+                                <input type="number" onchange="checkHead();" id="header_stop" min="1" onkeydown="return false" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -153,7 +153,7 @@
                         <div class="form-group row">
                             <label for="plan_start" class="col-sm-4 col-form-label">เริ่มต้นวันที่</label>
                             <div class="col-sm-8">
-                                <input type="text" id="plan_start" class="form-control datepicker" readonly>
+                                <input type="text" onchange="checkHead();" id="plan_start" class="form-control datepicker" readonly>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -165,17 +165,22 @@
                         <div class="form-group row">
                             <label for="plan_stop" class="col-sm-4 col-form-label">สิ้นสุดวันที่</label>
                             <div class="col-sm-8">
-                                <input id="plan_stop" class="form-control" readonly>
+                                <input id="plan_stop" onchange="checkHead();" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="header_usage" class="col-sm-4 col-form-label">จำนวนวันที่ใช้</label>
+                            <label for="total_date" class="col-sm-4 col-form-label">จำนวนวันที่ใช้</label>
                             <div class="col-sm-8">
-                                <input type="text" id="header_usage" class="form-control" disabled>
+                                <input type="text" id="total_date" class="form-control" disabled>
                             </div>
                         </div>
                     </form>
 
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnOkModal">OK</button>
+                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal">CLOSE</button>
                 </div>
 
             </div>
@@ -218,21 +223,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-    function checkHead(number){
-        let header_start = $('#header_start').val();
-        let header_stop = $('#header_stop').val();
-        let total = (header_stop - header_start)+1;
-        if(total<=0){
-            total = 1;
-        }
-        $('#header_qty').val(total);
-        // if(number>$("#header_start").val()){
-        //     $("#header_stop").val($("#header_start").val());
-        // }
-    }
-    </script>
 </body>
 
 </html>
@@ -255,7 +245,7 @@
             showAnim: "fadeIn"
         }).on('changeDate', function(ev){
             let dateStart = moment(ev.date.valueOf())
-            let lengthDay = $("#header_usage").val();
+            let lengthDay = $("#total_date").val();
             let dateStartFmt = dateStart.format('DD/MM/YYYY HH:mm:ss');
             let dateStop = dateStart.add(lengthDay, 'days').format('DD/MM/YYYY HH:mm:ss');
             $("#plan_stop").val(dateStop);

@@ -96,10 +96,12 @@ $(function() {
         letSuggestPlanning(wc, tm);
     });
 
-    $("#btnModalSuggestPlan").click(function(data) {
-        let wc = $('#work_center').val();
-        let tm = '';
-        letSuggestPlanning(wc, tm);
+    $('#btnModalSuggestPlan').click(function() {
+        alert('Suggest Planning...');
+    });
+
+    $('#btnOkModal').click(function() {
+        alert('Save Planning...');
     });
 
     $('button.fullscreen').on('click', function(){
@@ -146,6 +148,21 @@ function letSuggestPlanning(wc, tm){
     }
 }
 
+function checkHead(){
+    let header_start = $('#header_start').val();
+    let header_stop = $('#header_stop').val();
+    let total = (header_stop - header_start)+1;
+    if(total<=0){
+        total = 1;
+    }
+    $('#header_qty').val(total);
+
+    let dateA = moment($("#plan_stop").val(), 'DD/MM/YYYY');
+    let dateB = moment($("#plan_start").val(), 'DD/MM/YYYY');    
+    let total_date = dateA.diff(dateB, 'days');
+    $("#total_date").val(total_date);
+} 
+
 function loadDataGantt(){
     $.LoadingOverlay("show");
     clearTopic() ;
@@ -189,7 +206,7 @@ function zoomin() {
     $('#header_qty').css('font-size', '12px');
     $('#plan_start').css('font-size', '12px');
     $('#plan_stop').css('font-size', '12px');
-    $('#header_usage').css('font-size', '12px');
+    $('#total_date').css('font-size', '12px');
 
     $('#msg_tooltip').css('height', '180px');
     $('#msg_tooltip').css('width', '200px');
@@ -213,7 +230,7 @@ function zoomout() {
     $('#header_qty').css('font-size', '36px');
     $('#plan_start').css('font-size', '36px');
     $('#plan_stop').css('font-size', '36px');
-    $('#header_usage').css('font-size', '36px');
+    $('#total_date').css('font-size', '36px');
 
     $('#msg_tooltip').css('height', '720px');
     $('#msg_tooltip').css('width', '850px');
@@ -916,17 +933,22 @@ function showModalData(m) {
         $("#work_center").html($('<option>', {value:0, text: rs.WorkCenter_Id}));
 
         $("#sub_machine").html('');
-        for(let m of ALL_MACHINE){
-            let info = m[1];
-            $("#sub_machine").append($('<option>', {value:0, text: info.SubMachine_Id}));
-        }
+        $.getJSON("/get_data_sub_machine_data/"+rs.Model_Id+"/"+rs.WorkCenter_Id, function (data) {
+            for (let x = 0; x < data.length; x++) {
+              let info = data[x];
+              $("#sub_machine").append($('<option>', {value:0, text: info.SubMachine_Id}));
+            }
+        });
 
         $("#header_start").val(rs.Header_Start);
         $("#header_stop").val(rs.Header_Stop);
         $("#header_qty").val(rs.Header_Real);
         $("#plan_start").val(moment(rs.Plan_Start).add(-7, 'hours').format('DD/MM/YYYY HH:mm:ss'));
         $("#plan_stop").val(moment(rs.Plan_Stop).add(-7, 'hours').format('DD/MM/YYYY HH:mm:ss'));
-        $("#header_usage").val(rs.HeaderUsage);
+        let dateA = moment(rs.Plan_Stop).set({hour: 0, minute: 0, second: 0});
+        let dateB = moment(rs.Plan_Start).set({hour: 0, minute: 0, second: 0});
+        let total_date = dateA.diff(dateB, 'days');
+        $("#total_date").val(total_date);
 
         $('#header_start').attr('max',rs.Max_Header);
         $('#header_stop').attr('max',rs.Max_Header);

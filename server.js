@@ -38,6 +38,25 @@ router.get("/api/list/holidays", (req, res) => {
     });
 });
 
+router.get("/get_data_sub_machine_data/:model_id/:work_center_id", (req, res) => {
+  let model_id = req.params.model_id;
+  let work_center_id = req.params.work_center_id;
+  new sql.ConnectionPool(config).connect().then(pool=>{
+    let query  = " SELECT  sm.SubMachine_Id, sm.SubMachine_Name FROM VirtualHead_TB vh ";
+        query += " JOIN SubMachine_TB sm ON sm.SubMachine_Id = vh.SubMachine_Id ";
+        query += " JOIN WorkCenter_TB wc ON wc.WorkCenter_Id = sm.WorkCenter_Id  ";
+        query += " WHERE vh.Model_Id = '"+model_id+"' AND sm.WorkCenter_Id = '"+work_center_id+"' ";
+        query += " GROUP BY sm.SubMachine_Id, sm.SubMachine_Name ";
+    return pool.request().query(query)
+    }).then(result => {
+      res.json(result.recordset);
+      sql.close();
+    }).catch(err => {
+      res.send({ message: err})
+      sql.close();
+    });
+});
+
 router.get("/api/getDateWorkMin/:date/:machine_id", (req, res) => {
   let date = req.params.date;
   let machine_id = req.params.machine_id;
