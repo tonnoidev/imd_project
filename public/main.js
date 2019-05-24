@@ -97,7 +97,20 @@ $(function() {
     });
 
     $('#btnModalSuggestPlan').click(function() {
-        alert('Suggest Planning...');
+        var work_order = $('#work_order').val();
+        var wo_model = $('#wo_model').val();
+        var header_qty = $('#header_qty').val();
+        var plan_start = $('#plan_start').val();
+        var sub_machine = $('#sub_machine').val();
+        var header_start = $('#header_start').val();
+        var header_stop = $('#header_stop').val();
+
+        if(!work_order||!wo_model||!header_qty||!plan_start||!sub_machine||!header_start||!header_stop){
+            alert("กรุณาเลือกข้อมูลให้ครบก่อน");
+            return;
+        }
+
+        cal_manu_plan(work_order, wo_model, header_qty, plan_start, sub_machine, header_start, header_stop, item_id);
     });
 
     $('#btnOkModal').click(function() {
@@ -396,12 +409,19 @@ async function genHeader(work_center_id, team_id) {
                 html_header += '<th style="text-align:center;background-color:#e8e8e8;z-index: 5;">' + (y + 1) + '</th>';
             }
 
-            if(info.Header_Real){
+            if(info.Header_Real>0){
+                let countHeader = 0;
                 for (let y = 0; y < info.Header_Real; y++) {
-                    allHeader.push(info.SubMachine_Id + '_' + (y + 1) + '_N_'+info.Max_Header);
+                    allHeader.push(info.SubMachine_Id + '_' + (countHeader + 1) + '_N_'+info.Max_Header);
+                    countHeader++;
                 }
                 for (let y = 0; y < info.Header_Virtual; y++) {
-                    allHeader.push(info.SubMachine_Id + '_' + (y + 1) + '_Y_'+info.Max_Header);
+                    allHeader.push(info.SubMachine_Id + '_' + (countHeader + 1) + '_Y_'+info.Max_Header);
+                    countHeader++;
+                }
+                for (let y = countHeader; y < info.Max_Header; y++) {
+                    allHeader.push(info.SubMachine_Id + '_' + (countHeader + 1) + '_X_'+info.Max_Header);
+                    countHeader++;
                 }
             }else{
                 for (let y = 0; y < info.Max_Header; y++) {
@@ -715,7 +735,9 @@ function pumpDivHtml(){
                             if(found_wo==true){
                                 if(virtual==='Y'){
                                     data.push('<div virtual="Y" class="mydiv-plan-virtual '+info.WorkOrder_Id+'">&nbsp;</div>');
-                                }else{                                    
+                                }else if(virtual==='X'){
+                                    data.push('<div class="mydiv">'+planCountStr+'</div>');
+                                }else{
                                     if(arrBeforeGantt.length>0){
                                         if(arrBeforeGantt[0]!==''){
                                             data.push(arrBeforeGantt[0]);
@@ -735,6 +757,8 @@ function pumpDivHtml(){
                                     if(dateAt<plan_stop_date){
                                         if(virtual==='Y'){
                                             data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                        }else if(virtual==='X'){
+                                            data.push('<div class="mydiv">'+planCountStr+'</div>');
                                         }else{
                                             if(dateAt_fmt!==plan_stop_date_fmt){
                                                 if(arrBeforeGantt.length>0){
@@ -778,6 +802,8 @@ function pumpDivHtml(){
                                 }else{
                                     data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
                                 }                                
+                            }else if(virtual==='X'){
+                                data.push('<div class="mydiv-date-sunday">'+planCountStr+'</div>');
                             }else{                                
                                 if(arrBeforeGantt.length>0){
                                     if(dateAt < dateChkStart || dateAt > dateChkStop){
@@ -807,6 +833,8 @@ function pumpDivHtml(){
                                 if(dateAt<plan_stop_date){
                                     if(virtual==='Y'){
                                         data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                    }else if(virtual==='X'){
+                                        data.push('<div class="mydiv">'+planCountStr+'</div>');
                                     }else{
                                         if(arrBeforeGantt.length>0){
                                             if(arrBeforeGantt[0]!==''){
@@ -941,6 +969,7 @@ function showModalData(m) {
         });
 
         $("#header_start").val(rs.Header_Start);
+        $("#item_id").val(rs.Item_Id);
         $("#header_stop").val(rs.Header_Stop);
         $("#header_qty").val(rs.Header_Real);
         $("#plan_start").val(moment(rs.Plan_Start).add(-7, 'hours').format('DD/MM/YYYY HH:mm:ss'));
@@ -955,3 +984,190 @@ function showModalData(m) {
       }
     });
 }
+
+function cal_manu_plan(wo_id, $model_id, $head_qty, $start_date, $submachine_id, $head_start, $head_end, $item_id){
+    $setup_headder = $_POST['setup_headder'];
+    $setup_machine = $_POST['setup_machine'];
+
+    $data['wo_id'] = wo_id;
+    $data['plan_start'] = $start_date;
+    $data['submachine_id'] = $submachine_id;
+    $data['head_start'] = $head_start;
+    $data['head_stop'] = $head_end;
+    $data['model_data'] = $model_id;
+    $data['item_data'] = $item_id;
+    $data['proc_type'] = 'first';
+    $plan_start = $start_date;
+    $head_stop = $head_end;
+    $model_data = $model_id;
+    $item_data = $item_id;
+    $proc_type = 'first';
+    if(!empty(wo_id) && !empty($model_id) && !empty($head_qty) && !empty($start_date) && !empty($head_start) && !empty($head_end) && !empty($submachine_id)){
+        $res_fun_get_date_end_manual_plan = get_date_end_manual_plan(wo_id,$model_id,$head_qty,$start_date,$submachine_id,$head_start,$head_end,$setup_machine,$setup_headder);
+        if($res_fun_get_date_end_manual_plan['status'] == "found_wo_lock"){
+            $res['status'] = "found_data";
+            $res['sub_status'] = "found_data_lock";
+            $res['data'] = $res_fun_get_date_end_manual_plan;
+            break;
+        }else{
+            unset($res_get_top_wo);
+            $res_get_top_wo = [];
+            $res_get_top_wo = get_top_wo_data($submachine_id,$start_date,$head_start,$head_end,$model_id,$item_data,$proc_type,$setup_machine,$setup_headder);
+            $sql_get_time_setup_mac_and_head = "SELECT Model_SetupMachine,Model_SetupHead FROM Model_TB md WHERE md.Model_Id = '{$model_data}'";
+            $query_get_time_setup_mac_and_head = $db_oci->query($sql_get_time_setup_mac_and_head);
+            if($db_oci->num_rows($query_get_time_setup_mac_and_head)>0){
+                while($rec_get_time_setup_mac_and_head = $db_oci->fetch_array($query_get_time_setup_mac_and_head)){
+                    $time_model_setup_machine = ($rec_get_time_setup_mac_and_head['Model_SetupMachine'] != "" && $rec_get_time_setup_mac_and_head['Model_SetupMachine'] != null)?$rec_get_time_setup_mac_and_head['Model_SetupMachine']:0;
+                    $time_model_setup_head = ($rec_get_time_setup_mac_and_head['Model_SetupHead'] != "" && $rec_get_time_setup_mac_and_head['Model_SetupHead'] != null)?$rec_get_time_setup_mac_and_head['Model_SetupHead']:0;
+                }
+            }
+            if($res_get_top_wo['status_setup_machine'] == "non_setup"){
+                $qty_time_setup_mac_usage = 0;
+                if($res_get_top_wo['status_setup_head'] == "setup"){
+                    $qty_time_setup_head_usage = $time_model_setup_head;
+                }else{
+                    $qty_time_setup_head_usage = 0;
+                }
+            }else if($res_get_top_wo['status_setup_machine'] == "setup"){
+                $qty_time_setup_mac_usage = $time_model_setup_machine;
+                $qty_time_setup_head_usage = $time_model_setup_head;
+            } else {
+                $qty_time_setup_mac_usage = $setup_machine;
+                $qty_time_setup_head_usage = $setup_headder;
+            }
+            unset($res_new_end_data);
+            $res_new_end_data = [];
+            $res_new_end_data = get_date_end_manual_plan(wo_id,$model_id,$head_qty,$start_date,$submachine_id,$head_start,$head_end,$qty_time_setup_mac_usage,$qty_time_setup_head_usage);
+            $data['plan_stop'] = ($res_new_end_data['end_date'] != "" && $res_new_end_data['end_date'] != null)?$res_new_end_data['end_date']:$start_date;
+            $data['save'] = $res_new_end_data;
+            if($res_new_end_data['status'] == "found_wo_lock"){
+                console.log('no_place_wo');
+                break;
+            } else {
+                $res['status'] = "not_found_data";
+                $res['data'] = $res_fun_get_date_end_manual_plan;	
+            }                    
+        }
+    }else{
+        $res['status'] = "not_found_data";
+    }
+}
+
+// function get_date_end_manual_plan(wo_id,$model_id,$head_qty,$start_date,$submachine_id,$head_start,$head_end,$setup_machine_data=0,$setup_head_data=0){
+//     global $db_oci;
+//     $status;
+//     if(!empty(wo_id) && !empty($model_id) && !empty($head_qty) && !empty($start_date)){
+//         $sql_get_qty_req_wo = "SELECT Item_Qty
+//         FROM WorkOrderScoring_TB
+//         WHERE WorkOrder_Id = SUBSTRING('{wo_id}',1,8)
+//         GROUP BY WorkOrder_Id,Item_Qty";
+//         if(!$query_get_qty_req_wo = $db_oci->query($sql_get_qty_req_wo)) throw new Exception('Query Fail');
+//         else{
+//             if($db_oci->num_rows($query_get_qty_req_wo)>0){
+//                 while($rec_get_qty_req_wo = $db_oci->fetch_array($query_get_qty_req_wo)){
+//                     $item_qty = $rec_get_qty_req_wo ['Item_Qty'];
+//                     $sql_get_capa = "SELECT Model_Capacity
+//                     FROM Model_TB
+//                     WHERE Model_Id = '{$model_id}'
+//                     GROUP BY Model_Id,Model_Capacity";
+//                     if(!$query_get_capa = $db_oci->query($sql_get_capa)) throw new Exception('Query Fail');
+//                     else{
+//                         if($db_oci->num_rows($query_get_capa)>0){
+//                             while($rec_get_capa = $db_oci->fetch_array($query_get_capa)){
+//                                 $model_capa = $rec_get_capa['Model_Capacity'];
+//                                 $min_to_proc = ceil(($item_qty/$model_capa)/$head_qty);
+//                                 $min_to_proc = (int)(($min_to_proc+$setup_machine_data)+$setup_head_data);
+
+//                                 $res_get_end_date = getEndDate($start_date,$submachine_id,$min_to_proc);
+//                                 $time_data_from_tran = tran_num_hour_to_time($res_get_end_date['endHour']);
+//                                 $res_end_date =  date('Y-m-d H:i:s',strtotime($res_get_end_date['endDate'].' +'.$res_get_end_date['endHour'].' hours'));
+//                                 $res_end_date_return = $res_end_date;
+//                                 $res_start_date = $start_date;
+//                                 if(!empty($res_get_end_date)){
+//                                     tran_date_time($start_date);
+//                                     tran_date_time($res_end_date);
+//                                     $sql_check_date_lock = "SELECT pdt.WorkOrder_Id,pdt.Plan_Lock
+//                                     FROM PlanningTemp_TB pt
+//                                     JOIN PlanningDetailTemp_TB pdt ON pt.PN_Id = pdt.PN_Id 
+//                                     WHERE pdt.SubMachine_Id = '{$submachine_id}'
+//                                     AND pdt.WorkOrder_Id != SUBSTRING('{wo_id}',1,8)
+//                                     AND ( ( '{$start_date}' BETWEEN pdt.Plan_Start AND pdt.Plan_Stop ) 
+//                                     OR ( '{$res_end_date}' BETWEEN pdt.Plan_Start AND pdt.Plan_Stop ) 
+//                                     OR ( pdt.Plan_Start BETWEEN '{$start_date}' AND '{$res_end_date}' ) 
+//                                     OR ( pdt.Plan_Stop BETWEEN '{$start_date}' AND '{$res_end_date}' )) 
+//                                     AND (('{$head_start}' BETWEEN pdt.Header_Start AND pdt.Header_Stop)
+//                                     OR ('{$head_end}' BETWEEN pdt.Header_Start AND pdt.Header_Stop)
+//                                     OR (pdt.Header_Start BETWEEN '{$head_start}' AND '{$head_end}') AND (pdt.Header_Stop BETWEEN '{$head_start}' AND '{$head_end}'))
+//                                     GROUP BY pdt.WorkOrder_Id,pdt.Plan_Lock";
+//                                     if(!$query_check_date_lock = $db_oci->query($sql_check_date_lock)) throw new Exception('Query Fail');
+//                                     else{
+//                                         if($db_oci->num_rows($query_check_date_lock)>0){
+//                                             unset(wo_id_data);
+//                                             wo_id_data = [];
+//                                             $status = 'found_wo';
+//                                             while($rec_check_date_lock = $db_oci->fetch_array($query_check_date_lock)){
+//                                                 if($rec_check_date_lock['Plan_Lock'] == "L"){
+//                                                     $status = 'found_wo_lock';
+//                                                     wo_id_data[] = array(
+//                                                         'wo_id' =>  $rec_check_date_lock['WorkOrder_Id'],
+//                                                         'wo_status' =>  'wo_lock'
+//                                                     );
+//                                                 }else{
+//                                                     wo_id_data[] = array(
+//                                                         'wo_id' =>  $rec_check_date_lock['WorkOrder_Id'],
+//                                                         'wo_status' =>  'wo_un_lock'
+//                                                     );
+//                                                 }
+//                                             }
+//                                         }else{
+//                                             $status = 'not_found_wo';
+//                                             wo_id_data = 'not_found_wo';
+//                                         }
+//                                     }
+//                                 }else{
+//                                     $status = 'not_found_data_end_date';
+//                                     wo_id_data = 'not_found_data_end_date';
+//                                 }
+//                             }
+//                         }else{
+//                             $status = 'not_found_query_capa';
+//                             wo_id_data = 'not_found_query_capa';
+//                         }
+//                     }
+//                 }
+//             }else{
+//                 $status = 'not_found_query_item_qty';
+//                 wo_id_data = 'not_found_query_item_qty';
+//             }
+//         }
+//     }else{
+//         $status = 'data_error';
+//         wo_id_data = 'data_error';
+//     }
+//     $date_diff_res = "not_data_date_diff";
+//     if($status == "found_wo" || $status == "found_wo_lock" || $status == "not_found_wo"){
+//         $res_start_date = explode(" ",$res_start_date);
+//         $res_start_date = (!empty($res_start_date[0]))?$res_start_date[0]:"";
+//         $res_get_end_date_data = explode(" ",$res_get_end_date['endDate']);
+//         $res_get_end_date_data = (!empty($res_get_end_date_data[0]))?$res_get_end_date_data[0]:"";
+//         if($res_start_date != "" && $start_date != ""){
+//             $start_date = date_create($res_start_date);
+//             $end_date = date_create($res_get_end_date_data);
+//             $diff = date_diff($start_date,$end_date);
+//             $date_diff_res = $diff->format("%a");
+//             $date_diff_res = (int)$date_diff_res+1;
+//         }
+//     }
+//     return [
+//         'status' => $status ,
+//         'wo_data' => wo_id_data ,
+//         'end_date'  =>  $res_end_date_return,
+//         'end_hour'  =>  $time_data_from_tran,
+//         'date_diff' => $date_diff_res,
+//         'productionTime' => ceil(($item_qty/$model_capa)/$head_qty),
+//         'setup_machine' => $setup_machine_data,
+//         'setup_headder' => $setup_head_data,
+//         'head_start' => $head_start,
+//         'head_end' => $head_end
+//     ];
+// }
