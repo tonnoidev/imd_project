@@ -262,44 +262,11 @@ function getMapSizeWO(work_center_id, team_id){
             let startFmt = moment(info.Plan_Start).format('DD/MM/YYYY');
             let stopFmt = moment(info.Plan_Stop).format('DD/MM/YYYY');
 
-            let planStartHour = info.Plan_Start_Hour;
-            let planStopHour = info.Plan_Stop_Hour;
-
-            if(planStartHour<=8){
-                planStartHour = 8;
-            }else if(planStartHour<=16){
-                planStartHour = 16;
-            }else if(planStartHour<=24){
-                planStartHour = 24;
-            }
-
-            if(planStopHour<=8){
-                planStopHour = 8;
-            }else if(planStopHour<=16){
-                planStopHour = 16;
-            }else if(planStopHour<=24){
-                planStopHour = 24;
-            }
+            let rowSize = parseInt(info.rowSize)/60;
 
             //check start date
-            if(lengthPlanRow.get(startFmt)){
-                let test = lengthPlanRow.get(startFmt);
-                if(planStartHour>test){
-                    lengthPlanRow.set(startFmt, planStartHour);
-                }
-            }else{
-                lengthPlanRow.set(startFmt, planStartHour);
-            }
-
-            //check stop date
-            if(lengthPlanRow.get(stopFmt)){
-                let test = lengthPlanRow.get(stopFmt);
-                if(planStopHour>test){
-                    lengthPlanRow.set(stopFmt, planStopHour);
-                }
-            }else{
-                lengthPlanRow.set(stopFmt, planStopHour);
-            }
+            lengthPlanRow.set(startFmt, rowSize);
+            lengthPlanRow.set(stopFmt, rowSize);
         }
     });
 }
@@ -664,7 +631,7 @@ function pumpDivHtml(){
             if(row_id==0&&col_id==0){// only first column [0]
                 let data = [];
                 for(let m of savePlan){
-                    let dateAt = m[0];
+                    let dateAt = m[0];                    
                     let infoArr= m[1];
                     let row_default = getLengthPlanRow(dateAt)-1;
                     if(infoArr!==''&&infoArr!=='Sunday'&&infoArr!=='Holiday'){
@@ -708,9 +675,10 @@ function pumpDivHtml(){
 
                 let arrBeforeGantt = '';
                 for(let m of savePlan){
+                    let dateCheckFmt = m[0];
                     let dateAt = moment(m[0], 'DD/MM/YYYY');
                     let infoArr= m[1];
-                    let row_default = getLengthPlanRow(dateAt);
+                    let row_default = getLengthPlanRow(dateCheckFmt);
                     if(infoArr!==''&&infoArr!=='Sunday'&&infoArr!=='Holiday'){//draw gantt chart
                         let showWO = '';
                         let infoTmp = [];
@@ -810,7 +778,7 @@ function pumpDivHtml(){
 
                             planCount++;
                         }//end row_default
-                    }else if(infoArr==='Sunday'||infoArr==='Holiday'){
+                    }else if(infoArr==='Sunday'||infoArr==='Holiday'){                        
                         if(info){
                             let dateChkStart = moment(info.Plan_Start);
                             let dateChkStop = moment(info.Plan_Stop);

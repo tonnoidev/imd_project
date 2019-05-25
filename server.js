@@ -9,6 +9,16 @@ const sql = require("mssql");
 
 const _sql =
   "select " +
+  "(SELECT (CASE WHEN t2.h > 0 THEN 0 ELSE t2.c END) AS Shift " +
+  "FROM (SELECT 480 * (CASE WHEN t1.c > 0 THEN 2 ELSE 1 END) AS c, " +
+  "(SELECT COUNT(Holiday_date) AS Expr1 " +
+  "FROM Holiday_TB AS h " +
+  "WHERE (Holiday_date = a.SetupMachine)) AS h " +
+  "FROM (SELECT COUNT(Shift_Duty_Id) AS c " +
+  "FROM Shift_Duty_TB AS sd " +
+  "WHERE (Shift_Duty_Date = a.SetupMachine) " +
+  "AND (SubMachine_Id =a.SubMachine_Id) " +
+  ") AS t1) AS t2 ) as rowSize," +
   "(select count(*) from WorkOrder_TB where WorkOrder_Id=a.WorkOrder_Id and  Order_Factor='SS' AND SaleOrder_Id is not null) ATP," +
   "b.Team_Id,b.WorkCenter_Id,b.Lane_Id,a.SubMachine_Id " +
   ",a.WorkOrder_Id,c.Item_Id,c.Model_Id " +
@@ -55,32 +65,6 @@ router.get("/get_data_sub_machine_data/:model_id/:work_center_id", (req, res) =>
       res.send({ message: err})
       sql.close();
     });
-});
-
-router.get("/api/getDateWorkMin/:date/:machine_id", (req, res) => {
-  let date = req.params.date;
-  let machine_id = req.params.machine_id;
-  let query = 'SELECT (CASE WHEN t2.h > 0 THEN 0 ELSE t2.c END) AS Shift ';
-  query += ' FROM (SELECT 480 * (CASE WHEN t1.c > 0 THEN 2 ELSE 1 END) AS c, ';
-  query += ' (SELECT COUNT(Holiday_date) AS Expr1 ';
-  query += ' FROM Holiday_TB AS h ';
-  query += ' WHERE (Holiday_date = \''+date+'\')) AS h ';
-  query += ' FROM (SELECT COUNT(Shift_Duty_Id) AS c ';
-  query += ' FROM Shift_Duty_TB AS sd ';
-  query += ' WHERE (Shift_Duty_Date = \''+date+'\') ';
-  query += ' AND (SubMachine_Id IN (\''+machine_id+'\')) ';
-  query += ' ) AS t1) AS t2 ';
-
-  new sql.ConnectionPool(config).connect().then(pool=>{
-    return pool.request().query(query);
-    }).then(result => {
-      res.json(result.recordset);
-      sql.close();
-    }).catch(err => {
-      res.send({ message: err})
-      sql.close();
-    });
-
 });
 
 router.post("/api/plan/:wc_id/:team_id", (req, res) => {
