@@ -488,6 +488,9 @@ async function generateGanttChart() {
 
         if(data.length>0){
             let info_end = INFO_END_DATE;
+            if(!info_end.Plan_Stop){
+                getLastPlanDate(WorkCenter_Id, team_id);
+            }
             let currDate = moment();
             let endDate = moment(info_end.Plan_Stop).add(1, 'days').format('DD/MM/YYYY');
 
@@ -718,7 +721,7 @@ function pumpDivHtml(){
                                 infoTmp.push(infoArr[a]);
                             }
                         }
-                        for(let i=0;i<row_default;i++){
+                        for(let i=0;i<row_default;i++){//start row_default
                             let found_wo = false;
                             for(let j=0;j<infoTmp.length;j++){
                                 if(showWO!==''&&i==infoTmp[j].Plan_Start_Hour){
@@ -759,7 +762,11 @@ function pumpDivHtml(){
                                     let dateAt_fmt = dateAt.format('DD/MM/YYYY');
                                     if(dateAt<plan_stop_date){
                                         if(virtual==='Y'){
-                                            data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                            if(dateAt_fmt==plan_stop_date_fmt && i >= info.Plan_Stop_Hour){
+                                                data.push('<div class="mydiv">'+planCountStr+'</div>');
+                                            }else{
+                                                data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                            }
                                         }else if(virtual==='X'){
                                             data.push('<div class="mydiv">'+planCountStr+'</div>');
                                         }else{
@@ -770,7 +777,11 @@ function pumpDivHtml(){
                                                     }
                                                     arrBeforeGantt.splice(0,1);
                                                 }else{
-                                                    data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                                    if(dateAt_fmt==plan_stop_date_fmt && i >= info.Plan_Stop_Hour){
+                                                        data.push('<div class="mydiv">'+planCountStr+'</div>');
+                                                    }else{
+                                                        data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                                    }
                                                 }
                                             }else if(dateAt_fmt===plan_stop_date_fmt&&i<plan_stop_hour){
                                                 if(arrBeforeGantt.length>0){
@@ -779,7 +790,11 @@ function pumpDivHtml(){
                                                     }
                                                     arrBeforeGantt.splice(0,1);
                                                 }else{
-                                                    data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                                    if(dateAt_fmt==plan_stop_date_fmt && i >= info.Plan_Stop_Hour){
+                                                        data.push('<div class="mydiv">'+planCountStr+'</div>');
+                                                    }else{
+                                                        data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                                    }
                                                 }
                                             }else{
                                                 data.push('<div class="mydiv">'+planCountStr+'</div>');
@@ -794,7 +809,7 @@ function pumpDivHtml(){
                             }
 
                             planCount++;
-                        }
+                        }//end row_default
                     }else if(infoArr==='Sunday'||infoArr==='Holiday'){
                         if(info){
                             let dateChkStart = moment(info.Plan_Start);
@@ -804,10 +819,10 @@ function pumpDivHtml(){
                                     data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
                                 }else{
                                     data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
-                                }                                
+                                }
                             }else if(virtual==='X'){
                                 data.push('<div class="mydiv-date-sunday">'+planCountStr+'</div>');
-                            }else{                                
+                            }else{
                                 if(arrBeforeGantt.length>0){
                                     if(dateAt < dateChkStart || dateAt > dateChkStop){
                                         data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
@@ -816,8 +831,8 @@ function pumpDivHtml(){
                                             data.push(arrBeforeGantt[0]);
                                         }
                                         arrBeforeGantt.splice(0,1);
-                                    }                                    
-                                }else{                                    
+                                    }
+                                }else{
                                     if(dateAt < dateChkStart || dateAt > dateChkStop){
                                         data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
                                     }else{
@@ -833,9 +848,15 @@ function pumpDivHtml(){
                         if(info){
                             for(let i=0;i<row_default;i++){
                                 let plan_stop_date = moment(info.Plan_Stop);
+                                let plan_stop_date_fmt = plan_stop_date.format('DD/MM/YYYY');
+                                let dateAt_fmt = dateAt.format('DD/MM/YYYY');
                                 if(dateAt<plan_stop_date){
                                     if(virtual==='Y'){
-                                        data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                        if(dateAt_fmt==plan_stop_date_fmt && i >= info.Plan_Stop_Hour){
+                                            data.push('<div class="mydiv">'+planCountStr+'</div>');
+                                        }else{
+                                            data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                        }
                                     }else if(virtual==='X'){
                                         data.push('<div class="mydiv">'+planCountStr+'</div>');
                                     }else{
@@ -845,7 +866,11 @@ function pumpDivHtml(){
                                             }
                                             arrBeforeGantt.splice(0,1);
                                         }else{
-                                            data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                            if(dateAt_fmt==plan_stop_date_fmt && i >= info.Plan_Stop_Hour){
+                                                data.push('<div class="mydiv">'+planCountStr+'</div>');
+                                            }else{
+                                                data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
+                                            }                                            
                                         }
                                     }
                                 }else{
