@@ -199,6 +199,23 @@ router.post("/upd/wo/:wo_id/:status", (req, res)=> {
   });
 });
 
+router.post("/api/getDateWorkMin", (req, res) => {
+  let mList = req.body.data;
+  let query = 'SELECT SubMachine_Id, Shift_Duty_Date ';
+  query += 'FROM Shift_Duty_TB ';
+  query += 'WHERE Shift_Duty_Date NOT IN (select Holiday_date from Holiday_TB)  ';
+  query += 'AND SubMachine_Id in('+mList+') ';
+  new sql.ConnectionPool(config).connect().then(pool=>{
+    return pool.request().query(query);
+    }).then(result => {
+      res.json(result.recordset);
+      sql.close();
+    }).catch(err => {
+      res.send({ message: err})
+      sql.close();
+    });
+});
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 

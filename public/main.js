@@ -10,6 +10,7 @@ var lengthPlanRow = new Map();
 var elem = document.documentElement;
 var INFO_END_DATE;
 var ALL_MACHINE = [];
+var page_type ='normal';
 
 $(function() {
 
@@ -156,7 +157,6 @@ function letSuggestPlanning(wc, tm){
             loadDataGantt();
         })
         .fail(function() {
-            // alert("Suggest Plan error !!!");
             loadDataGantt();
         })
     }
@@ -192,8 +192,8 @@ function loadDataGantt(){
     }
     if(work_center_id!=''&&team_id!=''){
         getLastPlanDate(work_center_id, team_id)
-        getMapSizeWO(work_center_id, team_id);
-        genHeader(work_center_id, team_id);
+        getMapSizeWO(work_center_id, team_id);        
+        genHeader(work_center_id, team_id);        
     }
 }
 
@@ -227,6 +227,8 @@ function zoomin() {
     $('#msg_tooltip').css('height', '180px');
     $('#msg_tooltip').css('width', '200px');
     $('#msg_tooltip').css('font-size', '12px');
+
+    page_type ='normal';
 }
 
 function zoomout() {
@@ -251,6 +253,8 @@ function zoomout() {
     $('#msg_tooltip').css('height', '720px');
     $('#msg_tooltip').css('width', '850px');
     $('#msg_tooltip').css('font-size', '50px');
+
+    page_type ='zoom';
 }
 
 function getMapSizeWO(work_center_id, team_id){
@@ -267,6 +271,17 @@ function getMapSizeWO(work_center_id, team_id){
             //check start date
             lengthPlanRow.set(startFmt, rowSize);
             lengthPlanRow.set(stopFmt, rowSize);
+        }
+    });
+}
+
+function getMapSizeWorkMin(machineList){
+    $.post('/api/getDateWorkMin', {data: machineList})
+    .done((data) => {
+        for (let i = 0; i < data.length; i++) {
+            let info = data[i];
+            let date = moment(info.Shift_Duty_Date).format('DD/MM/YYYY');
+            lengthPlanRow.set(date, 16);
         }
     });
 }
@@ -372,9 +387,11 @@ async function genHeader(work_center_id, team_id) {
         html_header += '</tr>';
 
         // Slot
-        html_header += '<tr><th style="text-align:center;background-color:#e8e8e8;" width="10%">&nbsp</th>'
+        html_header += '<tr><th style="text-align:center;background-color:#e8e8e8;" width="10%">&nbsp</th>';
+        let machineList = "";
         for (let m of mMachine) {
             let info = m[1];
+            machineList += "'"+info.SubMachine_Id+"',";
             for (let y = 0; y < info.Max_Header; y++) {
                 html_header += '<th style="text-align:center;background-color:#e8e8e8;z-index: 5;">' + (y + 1) + '</th>';
             }
@@ -399,6 +416,7 @@ async function genHeader(work_center_id, team_id) {
                 }
             }
         }
+        machineList += "''";
         html_header += '</tr>';
         $('#myTable thead').html(html_header);
 
@@ -416,6 +434,8 @@ async function genHeader(work_center_id, team_id) {
         $('#myTable tbody').append(strData);
 
         ALL_MACHINE = mMachine;
+
+        getMapSizeWorkMin(machineList);
 
         generateGanttChart();
     });
@@ -603,7 +623,7 @@ function printWritePlan(info){
     return mappingWhitePlan;
 }
 
-function getLengthPlanRow(dateAt){
+function getLengthPlanRow(dateAt, machine_id){
     if(lengthPlanRow.get(dateAt)){
         return lengthPlanRow.get(dateAt);
     }else{
@@ -631,9 +651,9 @@ function pumpDivHtml(){
             if(row_id==0&&col_id==0){// only first column [0]
                 let data = [];
                 for(let m of savePlan){
-                    let dateAt = m[0];                    
+                    let dateAt = m[0];
                     let infoArr= m[1];
-                    let row_default = getLengthPlanRow(dateAt)-1;
+                    let row_default = getLengthPlanRow(dateAt, '')-1;
                     if(infoArr!==''&&infoArr!=='Sunday'&&infoArr!=='Holiday'){
                         data.push('<div class="mydiv-date">'+dateAt+'</div>');
                         for(let i=0;i<row_default;i++){
@@ -678,7 +698,7 @@ function pumpDivHtml(){
                     let dateCheckFmt = m[0];
                     let dateAt = moment(m[0], 'DD/MM/YYYY');
                     let infoArr= m[1];
-                    let row_default = getLengthPlanRow(dateCheckFmt);
+                    let row_default = getLengthPlanRow(dateCheckFmt, machine);
                     if(infoArr!==''&&infoArr!=='Sunday'&&infoArr!=='Holiday'){//draw gantt chart
                         let showWO = '';
                         let infoTmp = [];
@@ -778,7 +798,7 @@ function pumpDivHtml(){
 
                             planCount++;
                         }//end row_default
-                    }else if(infoArr==='Sunday'||infoArr==='Holiday'){                        
+                    }else if(infoArr==='Sunday'||infoArr==='Holiday'){
                         if(info){
                             let dateChkStart = moment(info.Plan_Start);
                             let dateChkStop = moment(info.Plan_Stop);
@@ -805,9 +825,9 @@ function pumpDivHtml(){
                                         data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
                                     }else{
                                         data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
-                                    }                                    
+                                    }
                                 }
-                            }                            
+                            }
                         }else{
                             data.push('<div class="mydiv-date-sunday">'+planCountStr+'</div>');
                         }
@@ -907,7 +927,7 @@ function addTooltipMsgEvent(){
                 $('#msg_tooltip').css('display', 'block');
                 $('#msg_tooltip').css('top', e.clientY + 20);
                 $('#msg_tooltip').css('left', e.clientX + 10);
-
+                
                 let showWoType = 'Real Head';
                 if($(this).attr('virtual')){
                     showWoType = 'Virtual Head';
