@@ -57,22 +57,6 @@ router.get("/get_data_sub_machine_data/:model_id/:work_center_id", (req, res) =>
     });
 });
 
-router.get("/cal_manu_plan/:wo_id/:item_id", (req, res) => {
-  let wo_id = req.params.wo_id;
-  let item_id = req.params.item_id;
-  
-  new sql.ConnectionPool(config).connect().then(pool=>{
-    let query  = "SELECT Item_Id FROM WorkOrder_TB WHERE WorkOrder_Id = SUBSTRING('"+wo_id+"',1,8)";;
-    return pool.request().query(query)
-    }).then(result => {      
-      res.json(result.recordset);
-      sql.close();
-    }).catch(err => {
-      res.send({ message: err})
-      sql.close();
-    });
-});
-
 router.get("/api/getDateWorkMin/:date/:machine_id", (req, res) => {
   let date = req.params.date;
   let machine_id = req.params.machine_id;
