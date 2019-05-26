@@ -422,12 +422,23 @@ async function genHeader(work_center_id, team_id) {
 
         // generate body 1 row
         let strData = '<tr>';
-        strData += '<td machine="" virtual="" max_head="" style="vertical-align: top; z-index: 5;">&nbsp;</td>';
+        strData += '<td col_id="0" machine="" virtual="" max_head="" style="vertical-align: top; z-index: 5;">&nbsp;</td>';
+        let tmp = '';
+        let count = 0;
         for (let j = 0; j < allHeader.length; j++) {
             let machine = allHeader[j].split('_')[0];
             let isVirtual = allHeader[j].split('_')[2];
             let maxHeader = allHeader[j].split('_')[3];
-            strData += '<td machine="'+machine+'" virtual="'+isVirtual+'" max_head="'+maxHeader+'" style="vertical-align: top;">&nbsp;</td>';
+            if(tmp===''){
+                tmp = machine;
+            }
+            if(tmp!==machine){
+                tmp = machine;
+                count = 1;
+            }else{
+                count++;
+            }
+            strData += '<td col_id="'+count+'" machine="'+machine+'" virtual="'+isVirtual+'" max_head="'+maxHeader+'" style="vertical-align: top;">&nbsp;</td>';
         }
         strData += '</tr>';
         COLS_TOTAL = allHeader.length;
@@ -631,6 +642,16 @@ function getLengthPlanRow(dateAt, machine_id){
     }
 }
 
+function checkColAt(col_id, info) {
+    if(col_id <= info.Header_Real){
+        return 'R';
+    }else if(col_id > info.HeaderUsage && col_id <= (info.Header_Real + info.Header_Virtual)){
+        return 'Y';
+    }else if(col_id > (info.Header_Real + info.Header_Virtual)){
+        return 'X';
+    }
+}
+
 function pumpDivHtml(){
     let saveMachine = new Map();
     let clickModal;
@@ -640,7 +661,8 @@ function pumpDivHtml(){
         $(this).find('> td').each(function(col_id){
             let machine = $(this).attr('machine');
             let virtual = $(this).attr('virtual');
-            let max_head = $(this).attr('max_head');            
+            let max_head = $(this).attr('max_head');
+            let columnsAt = $(this).attr('col_id');
 
             if(onlyMachine!==''){
                 if(machine!==onlyMachine){
@@ -679,13 +701,13 @@ function pumpDivHtml(){
                     }
                 }
 
-                let keyMap = machine+'_'+virtual;
-                if(saveMachine.get(keyMap)){
-                    let data = saveMachine.get(keyMap);
-                    $(this).html('<div id="contentArea'+col_id+'" class="clusterize-content"></div>');
-                    new Clusterize({ rows: data, scrollId: 'myTable', contentId: 'contentArea'+col_id, blocks_in_cluster: blocks_in_cluster });
-                    return;
-                }
+                // let keyMap = machine+'_'+virtual;
+                // if(saveMachine.get(keyMap)){
+                //     let data = saveMachine.get(keyMap);
+                //     $(this).html('<div id="contentArea'+col_id+'" class="clusterize-content"></div>');
+                //     new Clusterize({ rows: data, scrollId: 'myTable', contentId: 'contentArea'+col_id, blocks_in_cluster: blocks_in_cluster });
+                //     return;
+                // }
 
                 let data = [];
                 let planCount = 0;
@@ -714,7 +736,7 @@ function pumpDivHtml(){
                             for(let j=0;j<infoTmp.length;j++){
                                 if(showWO!==''&&i==infoTmp[j].Plan_Start_Hour){
                                     showWO = infoTmp[j].WorkOrder_Id;
-                                    info = infoTmp[j];//object workorder
+                                    info = infoTmp[j];//object workorder                                    
                                     if(info.ATP==1){
                                         atp = '-atp';
                                     }else{
@@ -726,11 +748,13 @@ function pumpDivHtml(){
                                     break;
                                 }
                             }
+
                             if(found_wo==true){
-                                if(virtual==='Y'){
+                                let chkMachine = checkColAt(columnsAt, info);
+                                if(chkMachine==='Y'){
                                     data.push('<div virtual="Y" class="mydiv-plan-virtual '+info.WorkOrder_Id+'">&nbsp;</div>');
-                                }else if(virtual==='X'){
-                                    data.push('<div class="mydiv">'+planCountStr+'</div>');
+                                }else if(chkMachine==='X'){
+                                    data.push('<div class="mydiv">'+planCountStr+'</div>');                                  
                                 }else{
                                     if(arrBeforeGantt.length>0){
                                         if(arrBeforeGantt[0]!==''){
@@ -744,18 +768,20 @@ function pumpDivHtml(){
                                 }
                             }else{
                                 if(info){
+                                    let chkMachine = checkColAt(columnsAt, info);
+
                                     let plan_stop_date = moment(info.Plan_Stop);
                                     let plan_stop_date_fmt = plan_stop_date.format('DD/MM/YYYY');
                                     let plan_stop_hour = info.Plan_Stop_Hour;
                                     let dateAt_fmt = dateAt.format('DD/MM/YYYY');
                                     if(dateAt<plan_stop_date){
-                                        if(virtual==='Y'){
+                                        if(chkMachine==='Y'){
                                             if(dateAt_fmt==plan_stop_date_fmt && i >= info.Plan_Stop_Hour){
                                                 data.push('<div class="mydiv">'+planCountStr+'</div>');
                                             }else{
                                                 data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
                                             }
-                                        }else if(virtual==='X'){
+                                        }else if(chkMachine==='X'){
                                             data.push('<div class="mydiv">'+planCountStr+'</div>');
                                         }else{
                                             if(dateAt_fmt!==plan_stop_date_fmt){
@@ -800,15 +826,17 @@ function pumpDivHtml(){
                         }//end row_default
                     }else if(infoArr==='Sunday'||infoArr==='Holiday'){
                         if(info){
+                            let chkMachine = checkColAt(columnsAt, info);
+
                             let dateChkStart = moment(info.Plan_Start);
                             let dateChkStop = moment(info.Plan_Stop);
-                            if(virtual==='Y'){
+                            if(chkMachine==='Y'){
                                 if(dateAt < dateChkStart || dateAt > dateChkStop){
                                     data.push('<div class="mydiv-date-sunday">&nbsp;</div>');
                                 }else{
                                     data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
                                 }
-                            }else if(virtual==='X'){
+                            }else if(chkMachine==='X'){
                                 data.push('<div class="mydiv-date-sunday">'+planCountStr+'</div>');
                             }else{
                                 if(arrBeforeGantt.length>0){
@@ -834,18 +862,20 @@ function pumpDivHtml(){
                         planCount++;
                     }else{
                         if(info){
+                            let chkMachine = checkColAt(columnsAt, info);
+
                             for(let i=0;i<row_default;i++){
                                 let plan_stop_date = moment(info.Plan_Stop);
                                 let plan_stop_date_fmt = plan_stop_date.format('DD/MM/YYYY');
                                 let dateAt_fmt = dateAt.format('DD/MM/YYYY');
                                 if(dateAt<plan_stop_date){
-                                    if(virtual==='Y'){
+                                    if(chkMachine==='Y'){
                                         if(dateAt_fmt==plan_stop_date_fmt && i >= info.Plan_Stop_Hour){
                                             data.push('<div class="mydiv">'+planCountStr+'</div>');
                                         }else{
                                             data.push('<div virtual="Y" class="mydiv-plan-virtual-bottom '+info.WorkOrder_Id+'">&nbsp;</div>');
                                         }
-                                    }else if(virtual==='X'){
+                                    }else if(chkMachine==='X'){
                                         data.push('<div class="mydiv">'+planCountStr+'</div>');
                                     }else{
                                         if(arrBeforeGantt.length>0){
