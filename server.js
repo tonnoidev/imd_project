@@ -9,6 +9,7 @@ const sql = require("mssql");
 
 const _sql =
   "select " +
+  "datediff(day, Plan_Start, Plan_Stop) diff_date, "+
   "((SetupMachine_Usage/60)+ " +
   "(case when SetupMachine_Usage>0 then 1 else 0 end)+ " +
   "(case when SetupHeader_Usage>0 then 1 else 0 end)+ " +
