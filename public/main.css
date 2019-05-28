@@ -7,6 +7,16 @@ table {
     border: 1px solid #000000;
 }
 
+.over-text-more {
+    white-space: nowrap; 
+    writing-mode: vertical-rl; 
+    text-orientation: mixed; 
+    text-align: left; 
+    background: orange;
+    /* color: blue; */
+    float: right;
+}
+
 .mydiv {
     border-top: 1px solid #000000;
     width: 100%;    

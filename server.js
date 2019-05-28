@@ -9,7 +9,9 @@ const sql = require("mssql");
 
 const _sql =
   "select " +
-  "datediff(day, Plan_Start, Plan_Stop) diff_date, "+
+  "(case when (datediff(day, a.Plan_Start, a.Plan_Stop) + 1) = 1 " +
+  "then (datediff(day, a.Plan_Start, a.Plan_Stop) + 1 + a.Plan_Stop_Hour - a.Plan_Start_Hour) " +
+  "else 0 end) slot, datediff(day, Plan_Start, Plan_Stop)+1 diff_date, " +
   "((SetupMachine_Usage/60)+ " +
   "(case when SetupMachine_Usage>0 then 1 else 0 end)+ " +
   "(case when SetupHeader_Usage>0 then 1 else 0 end)+ " +

@@ -587,19 +587,29 @@ function addModal(wo){
 function printWritePlan(info){
     let atp = '';
     if(info.ATP==1){
-        atp = '-atp';
+        atp += '-atp';
     }
+
+    let hours_plus = Math.ceil(info.Production_Usage / 60);
 
     let clickModal =  addModal(info.WorkOrder_Id);
     let sizeRows = mappingPlanRow.get(info.WorkOrder_Id);
+    let totalSizeComp = info.SM_U-sizeRows;
+
+    let mini = '';
+    if(totalSizeComp>=0){
+        mini = '<span class="over-text-more '+info.WorkOrder_Id+'">&nbsp;' + info.Model_Id + ' ('+hours_plus+')</span>';
+    }
+
     let mappingWhitePlan = [];
     if (info.SetupMachine_Usage > 0){
         let showHeader = '';
         let count_hours = Math.ceil(info.SetupMachine_Usage/60);
         for(let i=0;i<count_hours;i++){
             if(i==0){
-                showHeader = info.SetupMachine_Usage;                
-                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine'+atp+' '+info.WorkOrder_Id+'">'+showHeader+'</div>');                                
+                showHeader = info.SetupMachine_Usage+mini;
+                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+showHeader+'</div>');                                
+                mini = '';
             }else{
                 showHeader = '&nbsp;';
                 mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine-bottom'+atp+' '+info.WorkOrder_Id+'">'+showHeader+'</div>');
@@ -607,7 +617,8 @@ function printWritePlan(info){
         }
     }
     if(info.SetupHeader_Usage>0){
-        mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-header'+atp+' '+info.WorkOrder_Id+'">'+info.SetupHeader_Usage+'</div>');
+        mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-header'+atp+' '+info.WorkOrder_Id+'">'+info.SetupHeader_Usage+mini+'</div>');
+        mini = '';
     }
     if((info.Over_Week == 1)||(info.Over_Promise == 1)||(info.Plan_Lock == 'L')){
         let div_html = '';
@@ -623,12 +634,11 @@ function printWritePlan(info){
         mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+div_html+'</div>');
     }
     let vertext_html = '';
-    let hours_plus = Math.ceil(info.Production_Usage / 60);
     let show_vertical = 'writing-mode: vertical-rl;';
-    if(sizeRows<4){
+    if(sizeRows<=5){
         show_vertical = '';
     }
-    vertext_html += '<span style="white-space: nowrap; '+show_vertical+' text-orientation: mixed; text-align: left;">' + info.Model_Id + ' ('+hours_plus+')</span>';    
+    vertext_html += '<span style="white-space: nowrap; '+show_vertical+' text-orientation: mixed; text-align: left;">' + info.Model_Id + ' ('+hours_plus+')</span>';
     mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over-text'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+vertext_html+'</div>');
 
     return mappingWhitePlan;
@@ -653,7 +663,6 @@ function checkColAt(col_id, info) {
 }
 
 function pumpDivHtml(){
-    let saveMachine = new Map();
     let clickModal;
     
     $("#myTable").find('> tbody > tr').each(function(row_id){
@@ -896,8 +905,6 @@ function pumpDivHtml(){
                         }                        
                     }
                 }
-
-                saveMachine.set(machine+'_'+virtual, data);
 
                 $(this).html('<div id="contentArea'+col_id+'" class="clusterize-content"></div>');
                 new Clusterize({ rows: data, scrollId: 'myTable', contentId: 'contentArea'+col_id, blocks_in_cluster: blocks_in_cluster });
