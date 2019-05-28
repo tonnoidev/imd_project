@@ -625,7 +625,7 @@ function printWritePlan(info){
     let vertext_html = '';
     let hours_plus = Math.ceil(info.Production_Usage / 60);
     let show_vertical = 'writing-mode: vertical-rl;';
-    if(sizeRows<5){
+    if(sizeRows<4){
         show_vertical = '';
     }
     vertext_html += '<span style="white-space: nowrap; '+show_vertical+' text-orientation: mixed; text-align: left;">' + info.Model_Id + ' ('+hours_plus+')</span>';    
@@ -700,14 +700,6 @@ function pumpDivHtml(){
                         return ;
                     }
                 }
-
-                // let keyMap = machine+'_'+virtual;
-                // if(saveMachine.get(keyMap)){
-                //     let data = saveMachine.get(keyMap);
-                //     $(this).html('<div id="contentArea'+col_id+'" class="clusterize-content"></div>');
-                //     new Clusterize({ rows: data, scrollId: 'myTable', contentId: 'contentArea'+col_id, blocks_in_cluster: blocks_in_cluster });
-                //     return;
-                // }
 
                 let data = [];
                 let planCount = 0;

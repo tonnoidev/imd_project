@@ -9,20 +9,20 @@ const sql = require("mssql");
 
 const _sql =
   "select " +
+  "((SetupMachine_Usage/60)+ " +
+  "(case when SetupMachine_Usage>0 then 1 else 0 end)+ " +
+  "(case when SetupHeader_Usage>0 then 1 else 0 end)+ " +
+  "(case when (Over_Week=0 or Over_Promise=0 or Plan_Lock='L') then 1 else 0 end)) SM_U, " +
   "(SELECT (CASE WHEN t2.h > 0 THEN 0 ELSE t2.c END) AS Shift " +
   "FROM (SELECT 480 * (CASE WHEN t1.c > 0 THEN 2 ELSE 1 END) AS c, " +
   "(SELECT COUNT(Holiday_date) AS Expr1 " +
-  "FROM Holiday_TB AS h " +
-  "WHERE (Holiday_date = a.SetupMachine)) AS h " +
+  "FROM Holiday_TB AS h WHERE (Holiday_date = a.SetupMachine)) AS h " +
   "FROM (SELECT COUNT(Shift_Duty_Id) AS c " +
-  "FROM Shift_Duty_TB AS sd " +
-  "WHERE (Shift_Duty_Date = a.SetupMachine) " +
-  "AND (SubMachine_Id =a.SubMachine_Id) " +
-  ") AS t1) AS t2 ) as rowSize," +
+  "FROM Shift_Duty_TB AS sd WHERE (Shift_Duty_Date = a.SetupMachine) " +
+  "AND (SubMachine_Id =a.SubMachine_Id) ) AS t1) AS t2 ) as rowSize," +
   "(select count(*) from WorkOrder_TB where WorkOrder_Id=a.WorkOrder_Id and  Order_Factor='SS' AND SaleOrder_Id is not null) ATP," +
   "b.Team_Id,b.WorkCenter_Id,b.Lane_Id,a.SubMachine_Id " +
-  ",a.WorkOrder_Id,c.Item_Id,c.Model_Id " +
-  ",a.Plan_Start,a.Plan_Start_Hour " +
+  ",a.WorkOrder_Id,c.Item_Id,c.Model_Id ,a.Plan_Start,a.Plan_Start_Hour " +
   ",a.Plan_Stop,a.Plan_Stop_Hour,a.Week_No,a.SetupMachine " +
   ",a. SetupMachine_Usage,a.SetupHeader_Usage,a.Production_Usage " +
   ",b.Max_Header,a.HeaderUsage,a.Header_Real,a.Header_Virtual,a.Header_Start,a.Header_Stop " +
