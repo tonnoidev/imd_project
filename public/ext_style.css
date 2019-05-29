@@ -60,3 +60,12 @@
     background-color: #FF5555;
     min-height: 20px;
 }
+
+.over-text-more-atp {    
+    white-space: nowrap; 
+    writing-mode: vertical-rl; 
+    text-orientation: mixed; 
+    text-align: left; 
+    background: orange;
+    float: right;
+}

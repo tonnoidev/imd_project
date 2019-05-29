@@ -598,7 +598,20 @@ function printWritePlan(info){
 
     let mini = '';
     if(totalSizeComp>=0){
-        mini = '<span class="over-text-more '+info.WorkOrder_Id+'">&nbsp;' + info.Model_Id + ' ('+hours_plus+')</span>';
+        let div_html = '';
+        if((info.Over_Week == 1)||(info.Over_Promise == 1)||(info.Plan_Lock == 'L')){            
+            if (info.Over_Week == 1){
+                div_html += '<span class="fa-stack fa-1x"><i class="fa fa-calendar-o"></i><span class="fa fa-stack-1x">7</span></span>';
+            }
+            if (info.Over_Promise == 1){
+                div_html += '<span class="fa-stack fa-1x"><i class="fa fa-calendar-o"></i><span class="fa fa-stack-1x">P</span></span>';
+            }
+            if (info.Plan_Lock == 'L'){
+                div_html += '<span class="fa-stack fa-1x"><i class="fa fa-lock"></i></span>';
+            }
+        }
+        mini += '<div '+clickModal+' class="mydiv-plan-over'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+div_html+'</div>';
+        mini += '<span class="over-text-more'+atp+' '+info.WorkOrder_Id+'">&nbsp;' + info.Model_Id + ' ('+hours_plus+')</span>';
     }
 
     let mappingWhitePlan = [];
