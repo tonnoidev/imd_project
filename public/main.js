@@ -101,7 +101,7 @@ $(function() {
         var work_order = $('#work_order').val();
         var wo_model = $('#wo_model').val();
         var header_qty = $('#header_qty').val();
-        var plan_start = $('#plan_start').val();
+        var plan_start = toDbDateFmt($('#plan_start').val());
         var sub_machine = $('#sub_machine').val();
         var header_start = $('#header_start').val();
         var header_stop = $('#header_stop').val();
@@ -158,13 +158,19 @@ $(function() {
         url += "&setup_machine="+setup_machine;
 
         var jqxhr = $.get(url, function(data) {
-            alert(data);
         })
-        .done(function(data) {
-            alert(data);
+        .done(function(info) {
+            let abc = '{"status_header":"none","header":{"header_real":10,"header_virtual":0,"old_head":"10","new_head":"10"},"status":"not_found_data","data":{"status":"found_wo","wo_data":[{"wo_id":"W6160134","wo_status":"wo_un_lock"}],"end_date":"2019-06-07 02:00:00","end_hour":"2:00:00","date_diff":3,"productionTime":1402,"setup_machine":"0","setup_headder":"60","head_start":"1","head_end":"10"}}';
+
+            // process here
+            if(info.status=='not_found_data'||info.data.status != 'found_wo_lock') {
+                $('#btnOkModal').show();
+            }else{
+                $('#btnOkModal').hide();
+            }
         })
         .fail(function(err) {
-            alert(err);
+            alert('err: '+err);
         })
     });
 
@@ -199,6 +205,17 @@ $(function() {
     });
 
 });
+
+function toDbDateFmt(dt) {
+    let dateFmt = dt.split('/');
+    let dd = dateFmt[0];
+    let mm = dateFmt[1];
+    let yyStr = dateFmt[2].split(' ');
+    let yy = yyStr[0];
+    let tt = yyStr[1];
+
+    return yy+'-'+mm+'-'+dd+' '+tt;
+}
 
 function letSuggestPlanning(wc, tm){
     if(wc !='' || tm != ''){
@@ -1075,7 +1092,7 @@ function showModalData(m) {
         $.getJSON("/get_data_sub_machine_data/"+rs.Model_Id+"/"+rs.WorkCenter_Id, function (data) {
             for (let x = 0; x < data.length; x++) {
               let info = data[x];
-              $("#sub_machine").append($('<option>', {value:0, text: info.SubMachine_Id}));
+              $("#sub_machine").append($('<option>', {value:info.SubMachine_Id, text: info.SubMachine_Id}));
             }
         });
 
