@@ -105,14 +105,67 @@ $(function() {
         var sub_machine = $('#sub_machine').val();
         var header_start = $('#header_start').val();
         var header_stop = $('#header_stop').val();
+        var setup_header = $('#setup_header').val();
+        var setup_machine = $('#setup_machine').val();
 
-        if(!work_order||!wo_model||!header_qty||!plan_start||!sub_machine||!header_start||!header_stop){
-            alert("กรุณาเลือกข้อมูลให้ครบก่อน");
+        if(!work_order){
+            alert("กรุณาเลือกข้อมูล Work Order ID");
+            return;
+        }
+        if(!wo_model){
+            alert("กรุณาเลือกข้อมูล Work Order Model");
+            return;
+        }
+        if(!header_qty){
+            alert("กรุณาเลือกข้อมูล Header Qty");
+            return;
+        }
+        if(!plan_start){
+            alert("กรุณาเลือกข้อมูล วันที่เริ่ม Plan");
+            return;
+        }
+        if(!sub_machine){
+            alert("กรุณาเลือกข้อมูล Sub Machine");
+            return;
+        }
+        if(!header_start){
+            alert("กรุณาเลือกข้อมูล หัวเริ่มต้น");
+            return;
+        }
+        if(!header_stop){
+            alert("กรุณาเลือกข้อมูล หัวสิ้นสุด");
+            return;
+        }
+        if(!setup_header){
+            alert("กรุณาเลือกข้อมูล setup header");
+            return;
+        }
+        if(!setup_machine){
+            alert("กรุณาเลือกข้อมูล setup machine");
             return;
         }
 
         // calculate planning from suggestion button
+        let url = "http://pf.imd.co.th:81/NCI_PPS_PHP/?page=/process/api&proc=cal_manu_plan";
+        url += "&wo_id="+work_order;
+        url += "&model_id="+wo_model;
+        url += "&head_qty="+header_qty;
+        url += "&start_date="+plan_start;
+        url += "&submachine_id="+sub_machine;
+        url += "&head_start="+header_start;
+        url += "&head_end="+header_stop;
+        url += "&setup_headder="+setup_header;
+        url += "&setup_machine="+setup_machine;
 
+        var jqxhr = $.get(url, function(data) {
+            alert(data);
+        })
+        .done(function(data) {
+            alert(data);
+        })
+        .fail(function(err) {
+            alert(err);
+        })
     });
 
     $('#btnOkModal').click(function() {
@@ -1039,6 +1092,9 @@ function showModalData(m) {
 
         $('#header_start').attr('max',rs.Max_Header);
         $('#header_stop').attr('max',rs.Max_Header);
+
+        $('#setup_header').val(rs.SetupHeader_Usage);
+        $('#setup_machine').val(rs.SetupMachine_Usage);
       }
     });
 }
