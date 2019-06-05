@@ -86,7 +86,7 @@ $(function() {
         let header_stop = $('#header_stop').val();
         let setup_header = $('#setup_header').val();
         let setup_machine = $('#setup_machine').val();
-        
+
         // save data
         let wo_id = $("#work_order").val();
         $.getJSON("/get_promise_date/"+wo_id, function (data) {
@@ -96,7 +96,7 @@ $(function() {
                     PN_Id: '',
                     Plan_Start: '',
                     Plan_Stop: '',
-                    WorkOrder_Id: '',
+                    WorkOrder_Id: work_order,
                     SubMachine_Id: '',
                     Plan_Start_Hour: '',
                     Plan_Stop_Hour: '',
@@ -113,9 +113,9 @@ $(function() {
                     Over_Week: '',
                     Over_Promise: ''
                 };
-                $.post('/save_manual_suggest_plan',{data: info}, function(data) {
-                    alert("บันทึกข้อมูลเรียบร้อย");
-                });
+                // $.post('/save_manual_suggest_plan',{data: info}, function(data) {
+                //     alert("บันทึกข้อมูลเรียบร้อย");
+                // });
             }
         })
     });
