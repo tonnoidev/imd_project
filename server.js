@@ -24,7 +24,7 @@ const _sql =
   "FROM Shift_Duty_TB AS sd WHERE (Shift_Duty_Date = a.SetupMachine) " +
   "AND (SubMachine_Id =a.SubMachine_Id) ) AS t1) AS t2 ) as rowSize," +
   "(select count(*) from WorkOrder_TB where WorkOrder_Id=a.WorkOrder_Id and  Order_Factor='SS' AND SaleOrder_Id is not null) ATP," +
-  "b.Team_Id,b.WorkCenter_Id,b.Lane_Id,a.SubMachine_Id " +
+  "b.Team_Id,b.WorkCenter_Id,b.Lane_Id,a.SubMachine_Id,PN_Id " +
   ",a.WorkOrder_Id,c.Item_Id,c.Model_Id ,a.Plan_Start,a.Plan_Start_Hour " +
   ",a.Plan_Stop,a.Plan_Stop_Hour,a.Week_No,a.SetupMachine " +
   ",a. SetupMachine_Usage,a.SetupHeader_Usage,a.Production_Usage " +
