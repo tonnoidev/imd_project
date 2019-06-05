@@ -183,7 +183,6 @@ router.get("/find_wo/:wc_id", (req, res) => {
 });
 
 router.post("/upd/wo/:wo_id/:status", (req, res)=> {
-  debugger
   let wo_id = req.params.wo_id;
   let status = req.params.status;
   if(status==='N') {
@@ -202,6 +201,55 @@ router.post("/upd/wo/:wo_id/:status", (req, res)=> {
   });
 });
 
+router.post("/save_manual_suggest_plan", (req, res)=> {
+  let info = req.body;
+
+  let query1 = "UPDATE PlanningTemp_TB SET ";
+    query1 += "Plan_Start='"+info.Plan_Start+"',";
+    query1 += "Plan_Stop='"+info.Plan_Stop+"',";
+    query1 += "Plan_Status='W',";
+    query1 += "Create_Date=GETDATE(),";
+    query1 += "Update_Date=GETDATE() ";
+    query1 += "WHERE PN_Id = "+info.PN_Id;
+
+  let query2 = "UPDATE PlanningDetailTemp_TB SET  ";
+    query2 += "WorkOrder_Id='"+info.WorkOrder_Id+"', ";
+    query2 += "SubMachine_Id='"+info.SubMachine_Id+"', ";
+    query2 += "Plan_Start='"+info.Plan_Start+"', ";
+    query2 += "Plan_Start_Hour='"+info.Plan_Start_Hour+"', ";
+    query2 += "Plan_Stop='"+info.Plan_Stop+"', ";
+    query2 += "Plan_Stop_Hour='"+info.Plan_Stop_Hour+"', ";
+    query2 += "Week_No='"+info.Week_No+"', ";
+    query2 += "SetupMachine='"+info.SetupMachine+"', ";
+    query2 += "SetupMachine_Usage='"+info.SetupMachine_Usage+"', ";
+    query2 += "SetupHeader_Usage='"+info.SetupHeader_Usage+"', ";
+    query2 += "Production_Usage='"+info.Production_Usage+"', ";
+    query2 += "HeaderUsage='"+info.HeaderUsage+"', ";
+    query2 += "Header_Real='"+info.Header_Real+"', ";
+    query2 += "Header_Virtual='"+info.Header_Virtual+"', ";
+    query2 += "Header_Start='"+info.Header_Start+"', ";
+    query2 += "Header_Stop='"+info.Header_Stop+"', ";
+    query2 += "Over_Week='"+info.Over_Week+"', ";
+    query2 += "Over_Promise='"+info.Over_Promise+"', ";
+    query2 += "Plan_Type='M', ";
+    query2 += "Plan_Lock='L', ";
+    query2 += "Create_Date=GETDATE(), ";
+    query2 += "Update_Date=GETDATE()  ";
+    query2 += "WHERE PN_Id = "+info.PN_Id;
+
+    new sql.ConnectionPool(config).connect().then(pool=>{
+      pool.request().query(query1);
+      pool.request().query(query2);
+      res.json('success');
+    }).then(result => {
+      res.json('success');
+      sql.close();
+    }).catch(err => {
+      res.send({ message: err})
+      sql.close();
+    });
+});
+
 router.post("/api/getDateWorkMin", (req, res) => {
   let mList = req.body.data;
   let query = 'SELECT SubMachine_Id, Shift_Duty_Date ';
@@ -215,6 +263,20 @@ router.post("/api/getDateWorkMin", (req, res) => {
       sql.close();
     }).catch(err => {
       res.send({ message: err})
+      sql.close();
+    });
+});
+
+router.get("/get_promise_date/:wo_id", (req, res) => {
+  let wo_id = req.params.wo_id;
+  new sql.ConnectionPool(config).connect().then(pool=>{
+    let query = "SELECT Promise_Date FROM WorkOrder_TB WHERE WorkOrder_Id=SUBSTRING('"+wo_id+"',1,8)";
+    return pool.request().query(query);
+    }).then(result => {
+      res.json(result.recordset);
+      sql.close();
+    }).catch(err => {
+      res.send({ message: err});
       sql.close();
     });
 });

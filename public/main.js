@@ -76,6 +76,50 @@ $(function() {
         loadDataGantt();
     });
 
+    $("#btnOkModal").click(function(){
+        let work_order = $('#work_order').val();
+        let wo_model = $('#wo_model').val();
+        let header_qty = $('#header_qty').val();
+        let plan_start = toDbDateFmt($('#plan_start').val());
+        let sub_machine = $('#sub_machine').val();
+        let header_start = $('#header_start').val();
+        let header_stop = $('#header_stop').val();
+        let setup_header = $('#setup_header').val();
+        let setup_machine = $('#setup_machine').val();
+        
+        // save data
+        let wo_id = $("#work_order").val();
+        $.getJSON("/get_promise_date/"+wo_id, function (data) {
+            for (let x = 0; x < data.length; x++) {
+                let Promise_Date = data[x].Promise_Date;
+                let info = {
+                    PN_Id: '',
+                    Plan_Start: '',
+                    Plan_Stop: '',
+                    WorkOrder_Id: '',
+                    SubMachine_Id: '',
+                    Plan_Start_Hour: '',
+                    Plan_Stop_Hour: '',
+                    Week_No: '',
+                    SetupMachine: '',
+                    SetupMachine_Usage: '',
+                    SetupHeader_Usage: '',
+                    Production_Usage: '',
+                    HeaderUsage: '',
+                    Header_Real: '',
+                    Header_Virtual: '',
+                    Header_Start: '',
+                    Header_Stop: '',
+                    Over_Week: '',
+                    Over_Promise: ''
+                };
+                $.post('/save_manual_suggest_plan',{data: info}, function(data) {
+                    alert("บันทึกข้อมูลเรียบร้อย");
+                });
+            }
+        })
+    });
+
     $("#btnSuggest").click(function(data) {
         let wc = '', tm = '';
         let radioValue = $("input[name='rdOpt']:checked").val();
@@ -98,25 +142,107 @@ $(function() {
     });
 
     $('#btnModalSuggestPlan').click(function() {
-        var work_order = $('#work_order').val();
-        var wo_model = $('#wo_model').val();
-        var header_qty = $('#header_qty').val();
-        var plan_start = $('#plan_start').val();
-        var sub_machine = $('#sub_machine').val();
-        var header_start = $('#header_start').val();
-        var header_stop = $('#header_stop').val();
+        let work_order = $('#work_order').val();
+        let wo_model = $('#wo_model').val();
+        let header_qty = $('#header_qty').val();
+        let plan_start = toDbDateFmt($('#plan_start').val());
+        let sub_machine = $('#sub_machine').val();
+        let header_start = $('#header_start').val();
+        let header_stop = $('#header_stop').val();
+        let setup_header = $('#setup_header').val();
+        let setup_machine = $('#setup_machine').val();
 
-        if(!work_order||!wo_model||!header_qty||!plan_start||!sub_machine||!header_start||!header_stop){
-            alert("กรุณาเลือกข้อมูลให้ครบก่อน");
+        if(!work_order){
+            alert("กรุณาเลือกข้อมูล Work Order ID");
+            return;
+        }
+        if(!wo_model){
+            alert("กรุณาเลือกข้อมูล Work Order Model");
+            return;
+        }
+        if(!header_qty){
+            alert("กรุณาเลือกข้อมูล Header Qty");
+            return;
+        }
+        if(!plan_start){
+            alert("กรุณาเลือกข้อมูล วันที่เริ่ม Plan");
+            return;
+        }
+        if(!sub_machine){
+            alert("กรุณาเลือกข้อมูล Sub Machine");
+            return;
+        }
+        if(!header_start){
+            alert("กรุณาเลือกข้อมูล หัวเริ่มต้น");
+            return;
+        }
+        if(!header_stop){
+            alert("กรุณาเลือกข้อมูล หัวสิ้นสุด");
+            return;
+        }
+        if(!setup_header){
+            alert("กรุณาเลือกข้อมูล setup header");
+            return;
+        }
+        if(!setup_machine){
+            alert("กรุณาเลือกข้อมูล setup machine");
             return;
         }
 
         // calculate planning from suggestion button
+        let url = "http://pf.imd.co.th:81/NCI_PPS_PHP/?page=/process/api&proc=cal_manu_plan";
+        url += "&wo_id="+work_order;
+        url += "&model_id="+wo_model;
+        url += "&head_qty="+header_qty;
+        url += "&start_date="+plan_start;
+        url += "&submachine_id="+sub_machine;
+        url += "&head_start="+header_start;
+        url += "&head_end="+header_stop;
+        url += "&setup_headder="+setup_header;
+        url += "&setup_machine="+setup_machine;
 
-    });
+        var jqxhr = $.get(url, function(data) {
+        })
+        .done(function(info) {
 
-    $('#btnOkModal').click(function() {
-        alert('Save Planning...');
+            info = info.substring(1, info.length);
+            info = JSON.parse(info);
+
+            // process here
+            if(info.status=='not_found_data'||info.data.status != 'found_wo_lock') {
+                $('#btnOkModal').show();
+            }else{
+                $('#btnOkModal').hide();
+            }
+
+            // process continue
+            if(info.status == 'not_found_data') {
+                alert("ประมวลผลสำเร็จ : ไม่มี WO ทับซ้อน");
+                if(info.status_header == "adjust"){
+                    alert("จำนวนหัวที่ใช้ เปลี่ยนจาก "+info.header.old_head+" เป็น "+info.header.new_head);
+                }
+            }else if(info.status == 'found_data'){
+                if(info.status == "found_wo" || 
+                info.status == "not_found_wo" || 
+                info.status == "found_wo_lock"){
+                    if(info.status != "found_wo_lock"){
+                        alert("ประมวลผลสำเร็จ");
+                        if(info.status_header = "adjust"){
+                            alert("จำนวนหัวที่ใช้ เปลี่ยนจำก "+info.header.old_head +" เป็น "+info.header.new_head);
+                        }
+                    }else{
+                        alert("พบ WO LOCK กรุณำทำกำรเปลี่ยนข้อมูลและ Manual WO ใหม่");
+                    }
+                }else{
+                    alert("ไม่พบข้อมูล กรุณำลองอีกครั้ง");
+                }
+            }else{
+                alert("ไม่พบข้อมูล กรุณำลองอีกครั้ง");
+            }
+        })
+        .fail(function(err) {
+            alert('err: '+err);
+        })
     });
 
     $('button.fullscreen').on('click', function(){
@@ -146,6 +272,17 @@ $(function() {
     });
 
 });
+
+function toDbDateFmt(dt) {
+    let dateFmt = dt.split('/');
+    let dd = dateFmt[0];
+    let mm = dateFmt[1];
+    let yyStr = dateFmt[2].split(' ');
+    let yy = yyStr[0];
+    let tt = yyStr[1];
+
+    return yy+'-'+mm+'-'+dd+' '+tt;
+}
 
 function letSuggestPlanning(wc, tm){
     if(wc !='' || tm != ''){
@@ -1022,7 +1159,7 @@ function showModalData(m) {
         $.getJSON("/get_data_sub_machine_data/"+rs.Model_Id+"/"+rs.WorkCenter_Id, function (data) {
             for (let x = 0; x < data.length; x++) {
               let info = data[x];
-              $("#sub_machine").append($('<option>', {value:0, text: info.SubMachine_Id}));
+              $("#sub_machine").append($('<option>', {value:info.SubMachine_Id, text: info.SubMachine_Id}));
             }
         });
 
@@ -1039,6 +1176,9 @@ function showModalData(m) {
 
         $('#header_start').attr('max',rs.Max_Header);
         $('#header_stop').attr('max',rs.Max_Header);
+
+        $('#setup_header').val(rs.SetupHeader_Usage);
+        $('#setup_machine').val(rs.SetupMachine_Usage);
       }
     });
 }
