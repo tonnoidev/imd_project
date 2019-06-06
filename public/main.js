@@ -11,6 +11,7 @@ var elem = document.documentElement;
 var INFO_END_DATE;
 var ALL_MACHINE = [];
 var page_type ='normal';
+var SUCCESS_INFO;
 
 $(function() {
 
@@ -77,45 +78,60 @@ $(function() {
     });
 
     $("#btnOkModal").click(function(){
-        let work_order = $('#work_order').val();
-        let wo_model = $('#wo_model').val();
-        let header_qty = $('#header_qty').val();
-        let plan_start = toDbDateFmt($('#plan_start').val());
-        let sub_machine = $('#sub_machine').val();
-        let header_start = $('#header_start').val();
-        let header_stop = $('#header_stop').val();
-        let setup_header = $('#setup_header').val();
-        let setup_machine = $('#setup_machine').val();
+        let woId = SUCCESS_INFO.data.wo_data[0].wo_id;
+        let headerReal = SUCCESS_INFO.header.header_real;
+        let headerVirtual = SUCCESS_INFO.header.header_virtual;
+        let setupMachineUsage = 0;
+        let setupHeaderUsage = SUCCESS_INFO.data.setup_headder;
+        let headStart = SUCCESS_INFO.data.head_start;
+        let headEnd = SUCCESS_INFO.data.head_end;
+        let productionTime = SUCCESS_INFO.data.productionTime;
+        let pnId = $("#PN_Id").val();
+        let planStart = moment($("#plan_start").val(), 'DD/MM/YYYY h:mm:ss').format('YYYY-MM-DD');
+        let planStop = moment($("#plan_stop").val(), 'DD/MM/YYYY h:mm:ss').format('YYYY-MM-DD');
+        let subMachine = $("#sub_machine").val();
+        let planStartHour = moment($("#plan_start").val(), 'DD/MM/YYYY h:mm:ss').format('h');
+        let planStopHour = moment($("#plan_stop").val(), 'DD/MM/YYYY h:mm:ss').format('h');
+        let setupMachine = moment(SUCCESS_INFO.data.setup_machine, 'YYYY-MM-DD').format('YYYY-MM-DD');
+        let weekNo = $("#Week_No").val();
+        let overWeek = $("#Over_Week").val();
+        let overPromise = $("#Over_Promise").val();
 
         // save data
-        let wo_id = $("#work_order").val();
-        $.getJSON("/get_promise_date/"+wo_id, function (data) {
+        $.getJSON("/get_promise_date/"+woId, function (data) {
             for (let x = 0; x < data.length; x++) {
                 let Promise_Date = data[x].Promise_Date;
                 let info = {
-                    PN_Id: '',
-                    Plan_Start: '',
-                    Plan_Stop: '',
-                    WorkOrder_Id: work_order,
-                    SubMachine_Id: '',
-                    Plan_Start_Hour: '',
-                    Plan_Stop_Hour: '',
-                    Week_No: '',
-                    SetupMachine: '',
-                    SetupMachine_Usage: '',
-                    SetupHeader_Usage: '',
-                    Production_Usage: '',
-                    HeaderUsage: '',
-                    Header_Real: '',
-                    Header_Virtual: '',
-                    Header_Start: '',
-                    Header_Stop: '',
-                    Over_Week: '',
-                    Over_Promise: ''
+                    PN_Id: pnId,
+                    Plan_Start: planStart,
+                    Plan_Stop: planStop,
+                    WorkOrder_Id: woId,
+                    SubMachine_Id: subMachine,
+                    Plan_Start_Hour: planStartHour,
+                    Plan_Stop_Hour: planStopHour,
+                    Week_No: weekNo,
+                    SetupMachine: setupMachine,
+                    SetupMachine_Usage: setupMachineUsage,
+                    SetupHeader_Usage: setupHeaderUsage,
+                    Production_Usage: productionTime,
+                    HeaderUsage: headEnd,
+                    Header_Real: headerReal,
+                    Header_Virtual: headerVirtual,
+                    Header_Start: headStart,
+                    Header_Stop: headEnd,
+                    Over_Week: overWeek,
+                    Over_Promise: overPromise
                 };
-                // $.post('/save_manual_suggest_plan',{data: info}, function(data) {
-                //     alert("บันทึกข้อมูลเรียบร้อย");
-                // });
+                $.post('/save_manual_suggest_plan',{data: info}, function(data) {
+                    alert("บันทึกข้อมูลเรียบร้อย");
+                    $('#btnOkModal').hide();
+                    $("#myModal").modal('hide');
+
+                    let wc = $("#selWC").val();
+                    let tm = $("#selTeam").val();
+                    
+                    letSuggestPlanning(wc, tm);
+                });
             }
         })
     });
@@ -207,6 +223,8 @@ $(function() {
 
             info = info.substring(1, info.length);
             info = JSON.parse(info);
+
+            SUCCESS_INFO = info;
 
             // process here
             if(info.status=='not_found_data'||info.data.status != 'found_wo_lock') {
@@ -1178,7 +1196,11 @@ function showModalData(m) {
         $('#header_stop').attr('max',rs.Max_Header);
 
         $('#setup_header').val(rs.SetupHeader_Usage);
-        $('#setup_machine').val(rs.SetupMachine_Usage);
+        $('#setup_machine').val(rs.SetupMachine);
+        $('#PN_Id').val(rs.PN_Id);
+        $('#Week_No').val(rs.Week_No);
+        $('#Over_Week').val(rs.Over_Week);
+        $('#Over_Promise').val(rs.Over_Promise);
       }
     });
 }
