@@ -821,11 +821,12 @@ function getLengthPlanRow(dateAt, machine_id){
 }
 
 function checkColAt(col_id, info) {
-    if(col_id <= info.Header_Real){
+    let headerReal = (info.Header_Real+info.Header_Start)-1;
+    if(col_id <= headerReal){
         return 'R';
-    }else if(col_id > info.HeaderUsage && col_id <= (info.Header_Real + info.Header_Virtual)){
+    }else if(col_id > headerReal && col_id <= (headerReal + info.Header_Virtual)){
         return 'Y';
-    }else if(col_id > (info.Header_Real + info.Header_Virtual)){
+    }else if(col_id > (headerReal + info.Header_Virtual)){
         return 'X';
     }
 }
@@ -903,7 +904,8 @@ function pumpDivHtml(){
                         for(let i=0;i<row_default;i++){//start row_default
                             let found_wo = false;
                             for(let j=0;j<infoTmp.length;j++){
-                                if(showWO!==''&&i==infoTmp[j].Plan_Start_Hour){
+                                let Plan_Start_Hour = infoTmp[j].Plan_Start_Hour;
+                                if(showWO!==''&&i==Plan_Start_Hour){
                                     showWO = infoTmp[j].WorkOrder_Id;
                                     info = infoTmp[j];//object workorder                                    
                                     if(info.ATP==1){
@@ -914,7 +916,9 @@ function pumpDivHtml(){
                                     arrBeforeGantt = printWritePlan(info);
                                     clickModal =  addModal(info.WorkOrder_Id);
                                     found_wo = true;
-                                    break;
+                                    if(col_id>=info.Header_Start&&col_id<=info.Header_Stop){
+                                        break;
+                                    }                                    
                                 }
                             }
 
@@ -1057,7 +1061,7 @@ function pumpDivHtml(){
                                                 data.push('<div class="mydiv">'+planCountStr+'</div>');
                                             }else{
                                                 data.push('<div '+clickModal+' class="mydiv-plan-bottom'+atp+' '+info.WorkOrder_Id+'">&nbsp;</div>');
-                                            }                                            
+                                            }
                                         }
                                     }
                                 }else{
