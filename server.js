@@ -238,10 +238,26 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
     query2 += "WHERE PN_Id = "+info.PN_Id;
 
     new sql.ConnectionPool(config).connect().then(pool=>{
-      pool.request().query(query1);
-      pool.request().query(query2);
-      res.json('success');
+      pool.request().query(query1, function(err, recordset){        
+        if(err){
+          console.error(err);
+          res.status(500).send(err.message);
+          return;
+        }
+        // console.log(query1);
+
+        pool.request().query(query2, function(err, recordset){
+          if(err){
+            console.error(err);
+            res.status(500).send(err.message);
+            return;
+          }
+
+          // console.log(query2);
+        });
+      });
     }).then(result => {
+      console.log("Update success");
       res.json('success');
       sql.close();
     }).catch(err => {

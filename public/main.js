@@ -87,8 +87,8 @@ $(function() {
         let headEnd = SUCCESS_INFO.data.head_end;
         let productionTime = SUCCESS_INFO.data.productionTime;
         let pnId = $("#PN_Id").val();
-        let planStart = moment($("#plan_start").val(), 'DD/MM/YYYY h:mm:ss').format('YYYY-MM-DD');
-        let planStop = moment($("#plan_stop").val(), 'DD/MM/YYYY h:mm:ss').format('YYYY-MM-DD');
+        let planStart = moment($("#plan_start").val(), 'DD/MM/YYYY h:mm:ss').format('YYYY-MM-DD h:mm:ss')+'.000';
+        let planStop = moment($("#plan_stop").val(), 'DD/MM/YYYY h:mm:ss').format('YYYY-MM-DD h:mm:ss')+'.000';
         let subMachine = $("#sub_machine").val();
         let planStartHour = moment($("#plan_start").val(), 'DD/MM/YYYY h:mm:ss').format('h');
         let planStopHour = moment($("#plan_stop").val(), 'DD/MM/YYYY h:mm:ss').format('h');
@@ -102,35 +102,32 @@ $(function() {
             for (let x = 0; x < data.length; x++) {
                 let Promise_Date = data[x].Promise_Date;
                 let info = {
-                    PN_Id: pnId,
-                    Plan_Start: planStart,
-                    Plan_Stop: planStop,
-                    WorkOrder_Id: woId,
-                    SubMachine_Id: subMachine,
-                    Plan_Start_Hour: planStartHour,
-                    Plan_Stop_Hour: planStopHour,
-                    Week_No: weekNo,
-                    SetupMachine: setupMachine,
-                    SetupMachine_Usage: setupMachineUsage,
-                    SetupHeader_Usage: setupHeaderUsage,
-                    Production_Usage: productionTime,
-                    HeaderUsage: headEnd,
-                    Header_Real: headerReal,
-                    Header_Virtual: headerVirtual,
-                    Header_Start: headStart,
-                    Header_Stop: headEnd,
-                    Over_Week: overWeek,
-                    Over_Promise: overPromise
+                    'PN_Id': pnId,
+                    'Plan_Start': planStart,
+                    'Plan_Stop': planStop,
+                    'WorkOrder_Id': woId,
+                    'SubMachine_Id': subMachine,
+                    'Plan_Start_Hour': planStartHour,
+                    'Plan_Stop_Hour': planStopHour,
+                    'Week_No': weekNo,
+                    'SetupMachine': setupMachine,
+                    'SetupMachine_Usage': setupMachineUsage,
+                    'SetupHeader_Usage': setupHeaderUsage,
+                    'Production_Usage': productionTime,
+                    'HeaderUsage': headEnd,
+                    'Header_Real': headerReal,
+                    'Header_Virtual': headerVirtual,
+                    'Header_Start': headStart,
+                    'Header_Stop': headEnd,
+                    'Over_Week': overWeek,
+                    'Over_Promise': overPromise
                 };
-                $.post('/save_manual_suggest_plan',{data: info}, function(data) {
+                $.post('/save_manual_suggest_plan',{...info}, function(data) {
                     alert("บันทึกข้อมูลเรียบร้อย");
                     $('#btnOkModal').hide();
                     $("#myModal").modal('hide');
 
-                    let wc = $("#selWC").val();
-                    let tm = $("#selTeam").val();
-                    
-                    letSuggestPlanning(wc, tm);
+                    loadDataGantt();
                 });
             }
         })
@@ -306,7 +303,7 @@ function letSuggestPlanning(wc, tm){
     if(wc !='' || tm != ''){
         let url = "http://pf.imd.co.th:81/NCI_PPS_PHP/?page=/process/api&proc=suggestPlan&wc="+wc+"&tm="+tm;
         var jqxhr = $.get(url, function() {
-            loadDataGantt();
+            // loadDataGantt();
         })
         .done(function() {
             loadDataGantt();
@@ -332,8 +329,7 @@ function checkHead(){
     $("#total_date").val(total_date);
 } 
 
-function loadDataGantt(){
-    $.LoadingOverlay("show");
+function loadDataGantt(){    
     clearTopic() ;
     let work_center_id = $("#selWC").val();
     let team_id = $("#selTeam").val();
@@ -346,9 +342,13 @@ function loadDataGantt(){
         team_id = '';
     }
     if(work_center_id!=''&&team_id!=''){
+        $.LoadingOverlay("show");
         getLastPlanDate(work_center_id, team_id)
         getMapSizeWO(work_center_id, team_id);        
         genHeader(work_center_id, team_id);        
+        // $.LoadingOverlay("hide");
+    }else{
+        alert("กรุณาเลือกข้อมูลเพื่อค้นหา");
     }
 }
 
