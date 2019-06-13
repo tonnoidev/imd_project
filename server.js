@@ -205,12 +205,13 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
   let info = req.body;
 
   let query1 = "UPDATE PlanningTemp_TB SET ";
-    query1 += "Plan_Start='"+info.Plan_Start+"',";
-    query1 += "Plan_Stop='"+info.Plan_Stop+"',";
+    query1 += "Plan_Start='"+(info.Plan_Start.substr(0, 10))+"',";
+    query1 += "Plan_Stop='"+(info.Plan_Stop.substr(0, 10))+"',";
     query1 += "Plan_Status='W',";
     query1 += "Create_Date=GETDATE(),";
     query1 += "Update_Date=GETDATE() ";
     query1 += "WHERE PN_Id = "+info.PN_Id;
+    console.log(query1);
 
   let query2 = "UPDATE PlanningDetailTemp_TB SET  ";
     query2 += "WorkOrder_Id='"+info.WorkOrder_Id+"', ";
@@ -236,9 +237,10 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
     query2 += "Create_Date=GETDATE(), ";
     query2 += "Update_Date=GETDATE()  ";
     query2 += "WHERE PN_Id = "+info.PN_Id;
+    // console.log(query2);
 
     new sql.ConnectionPool(config).connect().then(pool=>{
-      pool.request().query(query1, function(err, recordset){        
+      pool.request().query(query1, function(err, recordset){
         if(err){
           console.error(err);
           res.status(500).send(err.message);
@@ -257,7 +259,7 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
         });
       });
     }).then(result => {
-      console.log("Update success");
+      // console.log("Update success");
       res.json('success');
       sql.close();
     }).catch(err => {

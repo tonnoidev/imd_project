@@ -79,6 +79,9 @@ $(function() {
 
     $("#btnOkModal").click(function(){
         let woId = SUCCESS_INFO.data.wo_data[0].wo_id;
+        if(!woId){
+            woId = $("#work_order").val();
+        }
         let headerReal = SUCCESS_INFO.header.header_real;
         let headerVirtual = SUCCESS_INFO.header.header_virtual;
         let setupMachineUsage = 0;
@@ -87,12 +90,12 @@ $(function() {
         let headEnd = SUCCESS_INFO.data.head_end;
         let productionTime = SUCCESS_INFO.data.productionTime;
         let pnId = $("#PN_Id").val();
-        let planStart = moment($("#plan_start").val(), 'DD/MM/YYYY h:mm:ss').format('YYYY-MM-DD h:mm:ss')+'.000';
-        let planStop = moment($("#plan_stop").val(), 'DD/MM/YYYY h:mm:ss').format('YYYY-MM-DD h:mm:ss')+'.000';
+        let planStart = moment($("#plan_start").val(), 'DD/MM/YYYY HH:mm:ss').format('YYYY-MM-DD HH:mm:ss')+'.000';
+        let planStop = moment($("#plan_stop").val(), 'DD/MM/YYYY HH:mm:ss').format('YYYY-MM-DD HH:mm:ss')+'.000';
         let subMachine = $("#sub_machine").val();
-        let planStartHour = moment($("#plan_start").val(), 'DD/MM/YYYY h:mm:ss').format('h');
-        let planStopHour = moment($("#plan_stop").val(), 'DD/MM/YYYY h:mm:ss').format('h');
-        let setupMachine = moment(SUCCESS_INFO.data.setup_machine, 'YYYY-MM-DD').format('YYYY-MM-DD');
+        let planStartHour = moment($("#plan_start").val(), 'DD/MM/YYYY HH:mm:ss').format('H');
+        let planStopHour = moment($("#plan_stop").val(), 'DD/MM/YYYY HH:mm:ss').format('H');
+        let setupMachine = moment($("#plan_start").val(), 'DD/MM/YYYY HH:mm:ss').format('YYYY-MM-DD');
         let weekNo = $("#Week_No").val();
         let overWeek = $("#Over_Week").val();
         let overPromise = $("#Over_Promise").val();
@@ -222,6 +225,15 @@ $(function() {
             info = JSON.parse(info);
 
             SUCCESS_INFO = info;
+
+            // set value
+            let plan_stop_res = moment(SUCCESS_INFO.data.end_date, 'YYYY-MM-DD h:mm:ss');
+            $('#plan_stop').val(plan_stop_res.format('DD/MM/YYYY h:mm:ss'));
+            $('#total_date').val(SUCCESS_INFO.data.date_diff);
+            $('#header_start').val(SUCCESS_INFO.data.head_start);
+            $('#header_stop').val(SUCCESS_INFO.data.head_end);
+
+            // console.log(SUCCESS_INFO);
 
             // process here
             if(info.status=='not_found_data'||info.data.status != 'found_wo_lock') {
@@ -1194,13 +1206,13 @@ function showModalData(m) {
         let dateA = moment(rs.Plan_Stop).set({hour: 0, minute: 0, second: 0});
         let dateB = moment(rs.Plan_Start).set({hour: 0, minute: 0, second: 0});
         let total_date = dateA.diff(dateB, 'days');
-        $("#total_date").val(total_date);
+        $("#total_date").val(total_date+1);
 
         $('#header_start').attr('max',rs.Max_Header);
         $('#header_stop').attr('max',rs.Max_Header);
 
         $('#setup_header').val(rs.SetupHeader_Usage);
-        $('#setup_machine').val(rs.SetupMachine);
+        $('#setup_machine').val(rs.SetupMachine_Usage);
         $('#PN_Id').val(rs.PN_Id);
         $('#Week_No').val(rs.Week_No);
         $('#Over_Week').val(rs.Over_Week);
