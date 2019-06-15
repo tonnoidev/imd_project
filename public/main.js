@@ -84,7 +84,7 @@ $(function() {
         }
         let headerReal = SUCCESS_INFO.header.header_real;
         let headerVirtual = SUCCESS_INFO.header.header_virtual;
-        let setupMachineUsage = 0;
+        let setupMachineUsage = SUCCESS_INFO.data.setup_machine;
         let setupHeaderUsage = SUCCESS_INFO.data.setup_headder;
         let headStart = SUCCESS_INFO.data.head_start;
         let headEnd = SUCCESS_INFO.data.head_end;
@@ -1171,7 +1171,7 @@ function addTooltipMsgEvent(){
 
 function showModalData(m) {
     $.getJSON("/find_wo/"+m.id, function (data) {
-      for (let x = 0; x < data.length; x++) {      
+      for (let x = 0; x < data.length; x++) {
         let rs = data[x];
         if(rs.Plan_Lock=='L'){
             $("#myModal").modal('hide');
@@ -1193,7 +1193,12 @@ function showModalData(m) {
         $.getJSON("/get_data_sub_machine_data/"+rs.Model_Id+"/"+rs.WorkCenter_Id, function (data) {
             for (let x = 0; x < data.length; x++) {
               let info = data[x];
-              $("#sub_machine").append($('<option>', {value:info.SubMachine_Id, text: info.SubMachine_Id}));
+              let selected  = '';
+              if(info.SubMachine_Id==rs.SubMachine_Id) {
+                  selected = 'selected';
+              }
+            //   $("#sub_machine").append($('<option>', {value:info.SubMachine_Id, text: info.SubMachine_Id}));
+              $("#sub_machine").append('<option '+selected+' value='+info.SubMachine_Id+'>'+info.SubMachine_Id+'</option>');
             }
         });
 

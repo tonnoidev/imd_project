@@ -237,7 +237,7 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
     query2 += "Create_Date=GETDATE(), ";
     query2 += "Update_Date=GETDATE()  ";
     query2 += "WHERE PN_Id = "+info.PN_Id;
-    // console.log(query2);
+    console.log(query2);
 
     new sql.ConnectionPool(config).connect().then(pool=>{
       pool.request().query(query1, function(err, recordset){
