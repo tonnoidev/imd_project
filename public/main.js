@@ -78,10 +78,11 @@ $(function() {
     });
 
     $("#btnOkModal").click(function(){
-        let woId = SUCCESS_INFO.data.wo_data[0].wo_id;
-        if(!woId){
-            woId = $("#work_order").val();
-        }
+        // let woId = SUCCESS_INFO.data.wo_data[0].wo_id;
+        // if(!woId){
+        //     woId = $("#work_order").val();
+        // }
+        let woId = $("#work_order").val();
         let headerReal = SUCCESS_INFO.header.header_real;
         let headerVirtual = SUCCESS_INFO.header.header_virtual;
         let setupMachineUsage = SUCCESS_INFO.data.setup_machine;
@@ -93,8 +94,8 @@ $(function() {
         let planStart = moment($("#plan_start").val(), 'DD/MM/YYYY HH:mm:ss').format('YYYY-MM-DD HH:mm:ss')+'.000';
         let planStop = moment($("#plan_stop").val(), 'DD/MM/YYYY HH:mm:ss').format('YYYY-MM-DD HH:mm:ss')+'.000';
         let subMachine = $("#sub_machine").val();
-        let planStartHour = moment($("#plan_start").val(), 'DD/MM/YYYY HH:mm:ss').format('H');
-        let planStopHour = moment($("#plan_stop").val(), 'DD/MM/YYYY HH:mm:ss').format('H');
+        let planStartHour = moment($("#plan_start").val(), 'DD/MM/YYYY HH:mm:ss').format('HH');
+        let planStopHour = moment($("#plan_stop").val(), 'DD/MM/YYYY HH:mm:ss').format('HH');
         let setupMachine = moment($("#plan_start").val(), 'DD/MM/YYYY HH:mm:ss').format('YYYY-MM-DD');
         let weekNo = $("#Week_No").val();
         let overWeek = $("#Over_Week").val();
@@ -137,6 +138,7 @@ $(function() {
     });
 
     $("#btnSuggest").click(function(data) {
+        $.LoadingOverlay("show");
         let wc = '', tm = '';
         let radioValue = $("input[name='rdOpt']:checked").val();
         if(radioValue){
@@ -227,8 +229,8 @@ $(function() {
             SUCCESS_INFO = info;
 
             // set value
-            let plan_stop_res = moment(SUCCESS_INFO.data.end_date, 'YYYY-MM-DD h:mm:ss');
-            $('#plan_stop').val(plan_stop_res.format('DD/MM/YYYY h:mm:ss'));
+            let plan_stop_res = moment(SUCCESS_INFO.data.end_date, 'YYYY-MM-DD HH:mm:ss');
+            $('#plan_stop').val(plan_stop_res.format('DD/MM/YYYY HH:mm:ss'));
             $('#total_date').val(SUCCESS_INFO.data.date_diff);
             $('#header_start').val(SUCCESS_INFO.data.head_start);
             $('#header_stop').val(SUCCESS_INFO.data.head_end);
