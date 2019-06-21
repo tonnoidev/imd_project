@@ -131,14 +131,35 @@ $(function() {
                     $('#btnOkModal').hide();
                     $("#myModal").modal('hide');
 
-                    loadDataGantt();
+                    // loadDataGantt();
+
+                    // ### start suggest plan again ###
+                    let wc = '', tm = '';
+                    let radioValue = $("input[name='rdOpt']:checked").val();
+                    if(radioValue){
+                        if(radioValue=='wc'){
+                            wc = $("#selWC").val();
+                            if(wc==''){
+                                alert("กรุณาเลือก Work Center ก่อน");
+                                return;
+                            }
+                        }else if(radioValue=='team'){
+                            tm = $("#selTeam").val();
+                            if(tm==''){
+                                alert("กรุณาเลือก Team ก่อน");
+                                return;
+                            }
+                        }
+                    }
+                    letSuggestPlanning(wc, tm);
+                    // ### finish suggest plan again ###
                 });
             }
         })
     });
 
     $("#btnSuggest").click(function(data) {
-        $.LoadingOverlay("show");
+        // $.LoadingOverlay("show");
         let wc = '', tm = '';
         let radioValue = $("input[name='rdOpt']:checked").val();
         if(radioValue){
