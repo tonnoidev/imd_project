@@ -211,7 +211,6 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
     query1 += "Create_Date=GETDATE(),";
     query1 += "Update_Date=GETDATE() ";
     query1 += "WHERE PN_Id = "+info.PN_Id;
-    console.log(query1);
 
   let query2 = "UPDATE PlanningDetailTemp_TB SET  ";
     query2 += "WorkOrder_Id='"+info.WorkOrder_Id+"', ";
@@ -237,7 +236,6 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
     query2 += "Create_Date=GETDATE(), ";
     query2 += "Update_Date=GETDATE()  ";
     query2 += "WHERE PN_Id = "+info.PN_Id;
-    console.log(query2);
 
     new sql.ConnectionPool(config).connect().then(pool=>{
       pool.request().query(query1, function(err, recordset){
@@ -246,7 +244,6 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
           res.status(500).send(err.message);
           return;
         }
-        // console.log(query1);
 
         pool.request().query(query2, function(err, recordset){
           if(err){
@@ -255,11 +252,9 @@ router.post("/save_manual_suggest_plan", (req, res)=> {
             return;
           }
 
-          // console.log(query2);
         });
       });
     }).then(result => {
-      // console.log("Update success");
       res.json('success');
       sql.close();
     }).catch(err => {

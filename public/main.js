@@ -78,10 +78,6 @@ $(function() {
     });
 
     $("#btnOkModal").click(function(){
-        // let woId = SUCCESS_INFO.data.wo_data[0].wo_id;
-        // if(!woId){
-        //     woId = $("#work_order").val();
-        // }
         let woId = $("#work_order").val();
         let headerReal = SUCCESS_INFO.header.header_real;
         let headerVirtual = SUCCESS_INFO.header.header_virtual;
@@ -137,8 +133,7 @@ $(function() {
         })
     });
 
-    $("#btnSuggest").click(function(data) {
-        $.LoadingOverlay("show");
+    $("#btnSuggest").click(function(data) {        
         let wc = '', tm = '';
         let radioValue = $("input[name='rdOpt']:checked").val();
         if(radioValue){
@@ -209,6 +204,7 @@ $(function() {
 
         // calculate planning from suggestion button
         let url = "http://pf.imd.co.th:81/NCI_PPS_PHP/?page=/process/api&proc=cal_manu_plan";
+        console.log('Try to connect:'+url)
         url += "&wo_id="+work_order;
         url += "&model_id="+wo_model;
         url += "&head_qty="+header_qty;
@@ -234,8 +230,6 @@ $(function() {
             $('#total_date').val(SUCCESS_INFO.data.date_diff);
             $('#header_start').val(SUCCESS_INFO.data.head_start);
             $('#header_stop').val(SUCCESS_INFO.data.head_end);
-
-            // console.log(SUCCESS_INFO);
 
             // process here
             if(info.status=='not_found_data'||info.data.status != 'found_wo_lock') {
@@ -315,7 +309,9 @@ function toDbDateFmt(dt) {
 
 function letSuggestPlanning(wc, tm){
     if(wc !='' || tm != ''){
+        $.LoadingOverlay("show");
         let url = "http://pf.imd.co.th:81/NCI_PPS_PHP/?page=/process/api&proc=suggestPlan&wc="+wc+"&tm="+tm;
+        console.log('Try to connect:'+url)
         var jqxhr = $.get(url, function() {
             // loadDataGantt();
         })
@@ -326,6 +322,8 @@ function letSuggestPlanning(wc, tm){
             loadDataGantt();
         })
     }
+
+    $.LoadingOverlay("hide");
 }
 
 function checkHead(){
