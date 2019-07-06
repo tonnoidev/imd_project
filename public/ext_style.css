@@ -5,7 +5,7 @@
     white-space: nowrap;
     background-color: #FA8072;
     min-width: 25px;
-    min-height: 20px;
+    height: 20px;
 }
 .mydiv-plan-setup-machine-bottom-atp {
     border-top: 1px solid #FA8072;
@@ -14,7 +14,7 @@
     white-space: nowrap;
     background-color: #FA8072;
     min-width: 25px;
-    min-height: 20px;
+    height: 20px;
 }
 .mydiv-plan-setup-header-atp {
     border-top: 1px solid #000000;
@@ -23,7 +23,7 @@
     white-space: nowrap;
     background-color: #CD5C5C;
     min-width: 25px;
-    min-height: 20px;
+    height: 20px;
 }
 .mydiv-plan-over-atp {
     border-top: 1px solid #000000;
@@ -32,7 +32,7 @@
     white-space: nowrap;
     background-color: #FF5555;
     min-width: 25px;
-    min-height: 20px;
+    height: 20px;
 }
 .mydiv-plan-over-text-atp {
     border-top: 1px solid #FF5555;
@@ -41,7 +41,7 @@
     white-space: nowrap;
     background-color: #FF5555;
     min-width: 25px;
-    min-height: 20px;
+    height: 20px;
 }
 .mydiv-plan-atp {
     border-top: 1px solid #000000;
@@ -50,18 +50,18 @@
     white-space: nowrap;
     background-color: #FF5555;
     min-width: 25px;
-    min-height: 20px;
+    height: 20px;
 }
 .mydiv-plan-bottom-atp {
     border-bottom: 1px solid #FF5555;
-    width: 100%;    
+    width: 100%;
     text-align: center;
     white-space: nowrap;
     background-color: #FF5555;
-    min-height: 20px;
+    height: 20px;
 }
 
-.over-text-more-atp {    
+.over-text-more-atp {
     white-space: nowrap; 
     writing-mode: vertical-rl; 
     text-orientation: mixed; 

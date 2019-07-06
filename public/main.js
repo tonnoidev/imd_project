@@ -154,12 +154,7 @@ $(function() {
         })
     });
 
-<<<<<<< HEAD
     $("#btnSuggest").click(function(data) {        
-=======
-    $("#btnSuggest").click(function(data) {
-        // $.LoadingOverlay("show");
->>>>>>> 603e97669503a1da012133354053813b23547be3
         let wc = '', tm = '';
         let radioValue = $("input[name='rdOpt']:checked").val();
         if(radioValue){
@@ -363,8 +358,8 @@ function checkHead(){
 
     let dateA = moment($("#plan_stop").val(), 'DD/MM/YYYY');
     let dateB = moment($("#plan_start").val(), 'DD/MM/YYYY');    
-    let total_date = dateA.diff(dateB, 'days');
-    $("#total_date").val(total_date);
+    // let total_date = dateA.diff(dateB, 'days');
+    // $("#total_date").val(total_date);
 } 
 
 function loadDataGantt(){    
@@ -580,7 +575,7 @@ async function genHeader(work_center_id, team_id) {
         html_header += '</tr>';
 
         // Slot
-        html_header += '<tr><th style="text-align:center;background-color:#e8e8e8;" width="10%">&nbsp</th>';
+        html_header += '<tr><th style="text-align:center;background-color:#e8e8e8;" width="10%">&nbsp;</th>';
         let machineList = "";
         for (let m of mMachine) {
             let info = m[1];
@@ -794,16 +789,16 @@ function printWritePlan(info){
         let div_html = '';
         if((info.Over_Week == 1)||(info.Over_Promise == 1)||(info.Plan_Lock == 'L')){            
             if (info.Over_Week == 1){
-                div_html += '<span class="fa-stack fa-1x"><i class="fa fa-calendar-o"></i><span class="fa fa-stack-1x">7</span></span>';
+                div_html += '<span class="fa-stack fa-1x" style="height: 20;"><i class="fa fa-calendar-o"></i><span class="fa fa-stack-1x">7</span></span>';
             }
             if (info.Over_Promise == 1){
-                div_html += '<span class="fa-stack fa-1x"><i class="fa fa-calendar-o"></i><span class="fa fa-stack-1x">P</span></span>';
+                div_html += '<span class="fa-stack fa-1x" style="height: 20;"><i class="fa fa-calendar-o"></i><span class="fa fa-stack-1x">P</span></span>';
             }
             if (info.Plan_Lock == 'L'){
-                div_html += '<span class="fa-stack fa-1x"><i class="fa fa-lock"></i></span>';
+                div_html += '<span class="fa-stack fa-1x" style="height: 20;"><i class="fa fa-lock"></i></span>';
             }
         }
-        mini += '<div '+clickModal+' class="mydiv-plan-over'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+div_html+'</div>';
+        mini += '<div '+clickModal+' class="mydiv-plan-over'+atp+' '+info.WorkOrder_Id+'" style="height: 20px;">'+div_html+'</div>';
         mini += '<span class="over-text-more'+atp+' '+info.WorkOrder_Id+'">&nbsp;' + info.Model_Id + ' ('+hours_plus+')</span>';
     }
 
@@ -814,7 +809,7 @@ function printWritePlan(info){
         for(let i=0;i<count_hours;i++){
             if(i==0){
                 showHeader = info.SetupMachine_Usage+mini;
-                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+showHeader+'</div>');                                
+                mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-setup-machine'+atp+' '+info.WorkOrder_Id+'" style="height: 20px;">'+showHeader+'</div>');                                
                 mini = '';
             }else{
                 showHeader = '&nbsp;';
@@ -837,7 +832,7 @@ function printWritePlan(info){
         if (info.Plan_Lock == 'L'){
             div_html += '<span class="fa-stack fa-1x"><i class="fa fa-lock"></i></span>';
         }
-        mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+div_html+'</div>');
+        mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over'+atp+' '+info.WorkOrder_Id+'" style="height: 20px;">'+div_html+'</div>');
     }
     let vertext_html = '';
     let show_vertical = 'writing-mode: vertical-rl;';
@@ -845,7 +840,7 @@ function printWritePlan(info){
         show_vertical = '';
     }
     vertext_html += '<span style="white-space: nowrap; '+show_vertical+' text-orientation: mixed; text-align: left;">' + info.Model_Id + ' ('+hours_plus+')</span>';
-    mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over-text'+atp+' '+info.WorkOrder_Id+'" style="max-height: 20px;">'+vertext_html+'</div>');
+    mappingWhitePlan.push('<div '+clickModal+' class="mydiv-plan-over-text'+atp+' '+info.WorkOrder_Id+'" style="height: 20px;">'+vertext_html+'</div>');
 
     return mappingWhitePlan;
 }
@@ -1236,8 +1231,8 @@ function showModalData(m) {
         $("#plan_stop").val(moment(rs.Plan_Stop).add(-7, 'hours').format('DD/MM/YYYY HH:mm:ss'));
         let dateA = moment(rs.Plan_Stop).set({hour: 0, minute: 0, second: 0});
         let dateB = moment(rs.Plan_Start).set({hour: 0, minute: 0, second: 0});
-        let total_date = dateA.diff(dateB, 'days');
-        $("#total_date").val(total_date+1);
+        // let total_date = dateA.diff(dateB, 'days');
+        // $("#total_date").val(total_date+1);
 
         $('#header_start').attr('max',rs.Max_Header);
         $('#header_stop').attr('max',rs.Max_Header);
