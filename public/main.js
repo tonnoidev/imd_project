@@ -154,7 +154,7 @@ $(function() {
         })
     });
 
-    $("#btnSuggest").click(function(data) {        
+    $("#btnSuggest").click(function(data) {
         let wc = '', tm = '';
         let radioValue = $("input[name='rdOpt']:checked").val();
         if(radioValue){
@@ -329,8 +329,7 @@ function toDbDateFmt(dt) {
 }
 
 function letSuggestPlanning(wc, tm){
-    if(wc !='' || tm != ''){
-        $.LoadingOverlay("show");
+    if(wc !='' || tm != ''){        
         let url = "http://pf.imd.co.th:81/NCI_PPS_PHP/?page=/process/api&proc=suggestPlan&wc="+wc+"&tm="+tm;
         console.log('Try to connect:'+url)
         var jqxhr = $.get(url, function() {
@@ -342,9 +341,7 @@ function letSuggestPlanning(wc, tm){
         .fail(function() {
             loadDataGantt();
         })
-    }
-
-    $.LoadingOverlay("hide");
+    }    
 }
 
 function checkHead(){
