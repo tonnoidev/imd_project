@@ -127,8 +127,6 @@ $(function() {
                     $('#btnOkModal').hide();
                     $("#myModal").modal('hide');
 
-                    // loadDataGantt();
-
                     // ### start suggest plan again ###
                     let wc = '', tm = '';
                     let radioValue = $("input[name='rdOpt']:checked").val();
@@ -329,18 +327,17 @@ function toDbDateFmt(dt) {
 }
 
 function letSuggestPlanning(wc, tm){
-    if(wc !='' || tm != ''){        
+    if(wc !='' || tm != ''){
         let url = "http://pf.imd.co.th:81/NCI_PPS_PHP/?page=/process/api&proc=suggestPlan&wc="+wc+"&tm="+tm;
-        console.log('Try to connect:'+url)
-        var jqxhr = $.get(url, function() {
-            // loadDataGantt();
-        })
-        .done(function() {
+        clearTopic();
+        $('#showSuggestPlan').css('display', '');
+        get(url).then(function(response) {
+            $('#showSuggestPlan').css('display', 'none');
+            alert("ประมวลผลสำเร็จ: " + response);
             loadDataGantt();
-        })
-        .fail(function() {
-            loadDataGantt();
-        })
+         }, function(error) {
+           alert(error);
+         });
     }    
 }
 
@@ -1241,5 +1238,26 @@ function showModalData(m) {
         $('#Over_Week').val(rs.Over_Week);
         $('#Over_Promise').val(rs.Over_Promise);
       }
+    });    
+}
+
+function get(url) {
+    return new Promise(function(resolve, reject) {
+        var req = new XMLHttpRequest();
+        req.open('GET', url);
+    
+        req.onload = function() {
+            if (req.status == 200) {
+                resolve(req.response);
+            } else {
+                reject(Error(req.statusText));
+            }
+        };
+    
+        req.onerror = function() {
+            reject(Error("Network Error"));
+        };
+    
+        req.send();
     });
 }
