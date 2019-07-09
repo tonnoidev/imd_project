@@ -1,43 +1,50 @@
 ﻿/* www.menucool.com/tooltip/javascript-tooltip */
 
 /*For tooltip target element that has set class="tooltip" */
-.tooltip {text-decoration: none; border-bottom:1px dotted #36c;color: #36c; outline: none; position:static; display:inline; opacity:1;}
+.tooltip {text-decoration: none; border-bottom:1px dotted #004B6B;color: #004B6B; outline: none; position:static; display:inline; opacity:1; }
 
 /*For tooltip box*/
 #mcTooltip 
 {
-    line-height:20px;
-    border-width: 2px;   
-    color:#DDDDDD; 
-    border-color:#666666;
-    padding:20px;
+    line-height:16px;
+    border-width: 1px;   
+    color:#333; 
+    border-color:#BBB;
+    padding:2px;
     font-size: 12px;
     font-family: Verdana, Arial;
-    border-radius:3px;
-    background-color:#373737;
-    background-image:url(bg_ptn.png);
+    border-radius:6px;
+    background-color:#000000;
+}
+
+#mcTooltip.no-padding
+{
+    padding:0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
 }
 
 #mcTooltip, #mcttCo b {
-    box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    box-shadow: 0 1px 8px rgba(0,0,0,0.5);
 }
 
 /* For hyperlink within tooltip */
-#mcTooltip a { color:#6CF; }
+#mcTooltip a { color:#069; }
 
 /*Close button. Available when sticky or overlay has been set to true, or is on touch-enabled devices. */
 #mcttCloseButton
 { 
+    border-radius:4px;
     width:18px;
     height:18px;
-    margin-right:4px;
-    margin-top:4px;
-    /*background:black;*/  
+    margin-right:2px;
+    margin-top:2px;
+    background:black;    
 }
+
 /*Close button X symbol*/
 #mcttCloseButton:after {
     font:normal 38px/18px arial, sans-serif;
-    color:#999;
+    color:white;
     top:0;left:-2px;
 }
 
@@ -69,4 +76,3 @@
 
 /*compatible with bootstrap*/
 #mcTooltip, #mcTooltip div {box-sizing:content-box;}
-

@@ -1149,12 +1149,13 @@ function addTooltipMsgEvent(){
             let info = data[i];
             // add event
             $('.'+info.WorkOrder_Id).mouseover(function (e){
+                tooltip.hide();
                 $('.'+info.WorkOrder_Id).css('background-color', '#eeeeee');
                 $('.'+info.WorkOrder_Id).css('cursor', 'pointer');
 
-                $('#msg_tooltip').css('display', 'block');
-                $('#msg_tooltip').css('top', e.clientY + 20);
-                $('#msg_tooltip').css('left', e.clientX + 10);
+                // $('#msg_tooltip').css('display', 'block');
+                // $('#msg_tooltip').css('top', e.clientY + 20);
+                // $('#msg_tooltip').css('left', e.clientX + 10);
                 
                 let showWoType = 'Real Head';
                 if($(this).attr('virtual')){
@@ -1162,23 +1163,26 @@ function addTooltipMsgEvent(){
                 }
 
                 let add_tooltip = '';
-                add_tooltip += '<div style="padding: 10px;">';
-                add_tooltip += "WorkOrder : "+info.WorkOrder_Id+"<br>";
-                add_tooltip += "Model : "+info.Model_Id+"<br>";
-                add_tooltip += "Item : "+info.Item_Id+"<br>";
-                add_tooltip += "Header Type : "+showWoType+"<br>";
-                add_tooltip += "Setup Machine : "+info.SetupMachine_Usage+"<br>";
-                add_tooltip += "Setup Header : "+info.SetupHeader_Usage+"<br>";
-                add_tooltip += "Item Qty : "+info.HeaderUsage+"<br>";
-                add_tooltip += "Production Time : "+info.Production_Usage;
-                add_tooltip += "</div>";
+                add_tooltip += '<div style="font-size: 24px; width: 420px; height: 200px; padding: 10px; background-color: black; color: white;">';
+                add_tooltip += '<div style="height: 25px;">WorkOrder : '+info.WorkOrder_Id+'</div>';
+                add_tooltip += '<div style="height: 25px;">Model : '+info.Model_Id+'</div>';
+                add_tooltip += '<div style="height: 25px;">Item : '+info.Item_Id+'</div>';
+                add_tooltip += '<div style="height: 25px;">Header Type : '+showWoType+'</div>';
+                add_tooltip += '<div style="height: 25px;">Setup Machine : '+info.SetupMachine_Usage+'</div>';
+                add_tooltip += '<div style="height: 25px;">Setup Header : '+info.SetupHeader_Usage+'</div>';
+                add_tooltip += '<div style="height: 25px;">Item Qty : '+info.HeaderUsage+'</div>';
+                add_tooltip += '<div style="height: 25px;">Production Time : '+info.Production_Usage;
+                add_tooltip += '</div>';
+
+                tooltip.pop(this, add_tooltip)
                 
-                $("#msg_tooltip").html(add_tooltip);
+                // $("#msg_tooltip").html(add_tooltip);
             });
 
             $('.'+info.WorkOrder_Id).mouseout(function (){
-                $('#msg_tooltip').css('display', 'none');
+                // $('#msg_tooltip').css('display', 'none');
                 $('.'+info.WorkOrder_Id).css("background-color", "");
+                tooltip.hide();
             });
         }
     });    
