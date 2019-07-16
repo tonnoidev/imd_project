@@ -12,6 +12,8 @@ var INFO_END_DATE;
 var ALL_MACHINE = [];
 var page_type ='normal';
 var SUCCESS_INFO;
+var curr_x = 0;
+var curr_y = 0;
 
 $(function() {
 
@@ -349,11 +351,6 @@ function checkHead(){
         total = 1;
     }
     $('#header_qty').val(total);
-
-    let dateA = moment($("#plan_stop").val(), 'DD/MM/YYYY');
-    let dateB = moment($("#plan_start").val(), 'DD/MM/YYYY');    
-    // let total_date = dateA.diff(dateB, 'days');
-    // $("#total_date").val(total_date);
 } 
 
 function loadDataGantt(){    
@@ -372,8 +369,7 @@ function loadDataGantt(){
         $.LoadingOverlay("show");
         getLastPlanDate(work_center_id, team_id)
         getMapSizeWO(work_center_id, team_id);        
-        genHeader(work_center_id, team_id);        
-        // $.LoadingOverlay("hide");
+        genHeader(work_center_id, team_id);
     }else{
         alert("กรุณาเลือกข้อมูลเพื่อค้นหา");
     }
@@ -406,8 +402,8 @@ function zoomin() {
     $('#plan_stop').css('font-size', '12px');
     $('#total_date').css('font-size', '12px');
 
-    $('#msg_tooltip').css('height', '180px');
-    $('#msg_tooltip').css('width', '200px');
+    $('#msg_tooltip').css('height', '220px');
+    $('#msg_tooltip').css('width', '220px');
     $('#msg_tooltip').css('font-size', '12px');
 
     page_type ='normal';
@@ -432,8 +428,8 @@ function zoomout() {
     $('#plan_stop').css('font-size', '36px');
     $('#total_date').css('font-size', '36px');
 
-    $('#msg_tooltip').css('height', '720px');
-    $('#msg_tooltip').css('width', '850px');
+    $('#msg_tooltip').css('height', '220px');
+    $('#msg_tooltip').css('width', '450px');
     $('#msg_tooltip').css('font-size', '50px');
 
     page_type ='zoom';
@@ -1149,13 +1145,28 @@ function addTooltipMsgEvent(){
             let info = data[i];
             // add event
             $('.'+info.WorkOrder_Id).mouseover(function (e){
-                tooltip.hide();
+                // tooltip.hide();
                 $('.'+info.WorkOrder_Id).css('background-color', '#eeeeee');
                 $('.'+info.WorkOrder_Id).css('cursor', 'pointer');
 
-                // $('#msg_tooltip').css('display', 'block');
-                // $('#msg_tooltip').css('top', e.clientY + 20);
-                // $('#msg_tooltip').css('left', e.clientX + 10);
+                $('#msg_tooltip').css('display', 'block');
+                if(page_type==='zoom'){
+                    let xxxx = e.clientX*2;
+                    let yyyy = e.clientY*2;
+                    if(xxxx===curr_x){
+                        xxxx = xxxx-100;
+                    }
+                    if(yyyy===curr_y){
+                        yyyy = yyyy-100;
+                    }
+                    $('#msg_tooltip').css('left', xxxx);
+                    $('#msg_tooltip').css('top', yyyy);
+                    curr_x = xxxx;
+                    curr_y = yyyy;
+                }else{
+                    $('#msg_tooltip').css('top', e.clientY + 20);
+                    $('#msg_tooltip').css('left', e.clientX + 10);
+                }
                 
                 let showWoType = 'Real Head';
                 if($(this).attr('virtual')){
@@ -1163,7 +1174,7 @@ function addTooltipMsgEvent(){
                 }
 
                 let add_tooltip = '';
-                add_tooltip += '<div style="font-size: 24px; width: 420px; height: 200px; padding: 10px; background-color: black; color: white;">';
+                add_tooltip += '<div style="font-size: 14px; width: 420px; height: 220px; padding: 10px; background-color: black; color: white;">';
                 add_tooltip += '<div style="height: 25px;">WorkOrder : '+info.WorkOrder_Id+'</div>';
                 add_tooltip += '<div style="height: 25px;">Model : '+info.Model_Id+'</div>';
                 add_tooltip += '<div style="height: 25px;">Item : '+info.Item_Id+'</div>';
@@ -1174,15 +1185,15 @@ function addTooltipMsgEvent(){
                 add_tooltip += '<div style="height: 25px;">Production Time : '+info.Production_Usage;
                 add_tooltip += '</div>';
 
-                tooltip.pop(this, add_tooltip)
+                // tooltip.pop(this, add_tooltip)
                 
-                // $("#msg_tooltip").html(add_tooltip);
+                $("#msg_tooltip").html(add_tooltip);
             });
 
             $('.'+info.WorkOrder_Id).mouseout(function (){
-                // $('#msg_tooltip').css('display', 'none');
+                $('#msg_tooltip').css('display', 'none');
                 $('.'+info.WorkOrder_Id).css("background-color", "");
-                tooltip.hide();
+                // tooltip.hide();
             });
         }
     });    
@@ -1216,7 +1227,6 @@ function showModalData(m) {
               if(info.SubMachine_Id==rs.SubMachine_Id) {
                   selected = 'selected';
               }
-            //   $("#sub_machine").append($('<option>', {value:info.SubMachine_Id, text: info.SubMachine_Id}));
               $("#sub_machine").append('<option '+selected+' value='+info.SubMachine_Id+'>'+info.SubMachine_Id+'</option>');
             }
         });
@@ -1227,10 +1237,6 @@ function showModalData(m) {
         $("#header_qty").val(rs.Header_Real);
         $("#plan_start").val(moment(rs.Plan_Start).add(-7, 'hours').format('DD/MM/YYYY HH:mm:ss'));
         $("#plan_stop").val(moment(rs.Plan_Stop).add(-7, 'hours').format('DD/MM/YYYY HH:mm:ss'));
-        let dateA = moment(rs.Plan_Stop).set({hour: 0, minute: 0, second: 0});
-        let dateB = moment(rs.Plan_Start).set({hour: 0, minute: 0, second: 0});
-        // let total_date = dateA.diff(dateB, 'days');
-        // $("#total_date").val(total_date+1);
 
         $('#header_start').attr('max',rs.Max_Header);
         $('#header_stop').attr('max',rs.Max_Header);
