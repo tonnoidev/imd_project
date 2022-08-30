@@ -21,7 +21,7 @@
     "install": "^0.12.2",
     "jquery": "^3.4.1",
     "moment": "^2.24.0",
-    "moment-timezone": "^0.5.25",
+    "moment-timezone": "^0.5.35",
     "mssql": "^5.1.0",
     "npm": "^6.9.0",
     "path": "^0.12.7"
